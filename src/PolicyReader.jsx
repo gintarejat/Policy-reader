@@ -226,7 +226,7 @@ Return this exact structure:
       "section_title": "Crypto Asset Controls",
       "subject": "Bitcoin / Ethereum daily transactions",
       "limit": "EUR 3,000 per day",
-      "condition": "Standard accounts"
+      "condition": "Standard accounts";
     }
   ]
 }
