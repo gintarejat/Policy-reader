@@ -136,7 +136,7 @@ export default function PolicyReader() {
     const t1 = setTimeout(() => setLoadMsg("Comparing sections…"), 1200);
     const t2 = setTimeout(() => setLoadMsg("Identifying changes…"), 2500);
     try {
-      const prompt = `You are a compliance document analyst. Compare these two policy versions precisely.
+      const prompt = "You are a compliance document analyst. Compare these two policy versions precisely.
 
 VERSION 1:
 ${v1}
@@ -163,7 +163,7 @@ Return this exact structure:
   ]
 }
 Type must be: modified, added, or removed.
-Return ONLY the JSON object.`;
+Return ONLY the JSON object.";
 
       const raw = await callClaude({
         model: "claude-sonnet-4-20250514",
