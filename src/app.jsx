@@ -1,5 +1,10 @@
 
 import { useState, useCallback } from "react";
+import PolicyReader from './PolicyReader'
+
+export default function App() {
+  return <PolicyReader />
+}
 
 // ── Sample Data ────────────────────────────────────────────────────────────
 const SAMPLE_V1 = `SECTION 1 — SCOPE AND APPLICATION
