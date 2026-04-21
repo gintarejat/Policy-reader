@@ -136,35 +136,14 @@ export default function PolicyReader() {
     const t1 = setTimeout(() => setLoadMsg("Comparing sections…"), 1200);
     const t2 = setTimeout(() => setLoadMsg("Identifying changes…"), 2500);
     try {
-      const prompt = "You are a compliance document analyst. Compare these two policy versions precisely.
-
-VERSION 1:
-${v1}
-
-VERSION 2:
-${v2}
-
-CRITICAL: Your entire response must be a single raw JSON object. No markdown. No backticks. No explanation. No text before or after. Start with { and end with }.
-
-Return this exact structure:
-{
-  "summary": "1-2 sentence overall summary of what changed",
-  "total_changes": 4,
-  "changes": [
-    {
-      "section": "Section number and title e.g. Section 19 — Crypto Asset Controls",
-      "type": "modified",
-      "summary": "One sentence describing what changed in this section",
-      "old_text": "Full text of this section from Version 1 (empty string if new section)",
-      "new_text": "Full text of this section from Version 2 (empty string if removed section)",
-      "old_highlights": ["exact phrase from old_text that was removed or changed"],
-      "new_highlights": ["exact phrase from new_text that is new or changed"]
-    }
-  ]
-}
-Type must be: modified, added, or removed.
-Return ONLY the JSON object.";
-
+   const prompt = "You are a compliance document analyst. Compare these two policy versions precisely.\n\n" +
+  "VERSION 1:\n" + v1 + "\n\n" +
+  "VERSION 2:\n" + v2 + "\n\n" +
+  "CRITICAL: Your entire response must be a single raw JSON object. No markdown. No backticks. No explanation. No text before or after. Start with { and end with }.\n\n" +
+  "Return this exact structure:\n" +
+  '{"summary":"1-2 sentence overall summary","total_changes":4,"changes":[{"section":"Section 19 — Crypto Asset Controls","type":"modified","summary":"One sentence","old_text":"Full text from V1","new_text":"Full text from V2","old_highlights":["changed phrase"],"new_highlights":["new phrase"]}]}\n\n' +
+  "Type must be: modified, added, or removed. Return ONLY the JSON object.";
+      
       const raw = await callClaude({
         model: "claude-sonnet-4-20250514",
         max_tokens: 4000,
@@ -193,46 +172,12 @@ Return ONLY the JSON object.";
     const t1 = setTimeout(() => setLoadMsg("Extracting keywords and rules…"), 1500);
     const t2 = setTimeout(() => setLoadMsg("Grouping thresholds…"), 3000);
     try {
-      const prompt = "You are a compliance document analyst. Analyze this policy document.
-
-CRITICAL: Your entire response must be a single raw JSON object. No markdown. No backticks. No explanation. No text before or after. Start your response with { and end with }. Any other output will cause a system error.
-
-POLICY DOCUMENT:
-${analyzeText}
-
-Return this exact structure:
-{
-  "document_title": "inferred title",
-  "document_type": "e.g. AML Policy",
-  "jurisdiction": "e.g. EU / Nordic",
-  "scope_summary": "2-3 sentence plain-language summary",
-  "sections": [
-    { "id": "19", "title": "Crypto Asset Controls", "keywords": ["crypto","bitcoin","mixer"] }
-  ],
-  "rules": [
-    {
-      "section_id": "19",
-      "section_title": "Crypto Asset Controls",
-      "keyword": "crypto mixer",
-      "type": "prohibited",
-      "rule_text": "The company does not accept deposits from cryptocurrency mixers.",
-      "threshold": null,
-      "applies_to": "all customers"
-    }
-  ],
-  "thresholds_summary": [
-    {
-      "section_id": "19",
-      "section_title": "Crypto Asset Controls",
-      "subject": "Bitcoin / Ethereum daily transactions",
-      "limit": "EUR 3,000 per day",
-      "condition": "Standard accounts";
-    }
-  ]
-}
-Types: prohibited, permitted, threshold, required, conditional.
-Extract every distinct rule. For thresholds always include the exact amount and period.
-Return ONLY the JSON object.";
+      const prompt = "You are a compliance document analyst. Analyze this policy document.\n\n" +
+  "CRITICAL: Your entire response must be a single raw JSON object. No markdown. No backticks. No explanation. No text before or after. Start your response with { and end with }.\n\n" +
+  "POLICY DOCUMENT:\n" + analyzeText + "\n\n" +
+  "Return this exact structure:\n" +
+  '{"document_title":"inferred title","document_type":"e.g. AML Policy","jurisdiction":"e.g. EU / Nordic","scope_summary":"2-3 sentence summary","sections":[{"id":"19","title":"Crypto Asset Controls","keywords":["crypto","bitcoin"]}],"rules":[{"section_id":"19","section_title":"Crypto Asset Controls","keyword":"crypto mixer","type":"prohibited","rule_text":"The company does not accept deposits from mixers.","threshold":null,"applies_to":"all customers"}],"thresholds_summary":[{"section_id":"19","section_title":"Crypto Asset Controls","subject":"BTC/ETH daily","limit":"EUR 3,000 per day","condition":"Standard accounts"}]}\n\n' +
+  "Types: prohibited, permitted, threshold, required, conditional. Extract every distinct rule. Return ONLY the JSON object.";
 
       const raw = await callClaude({
         model: "claude-sonnet-4-20250514",
