@@ -193,7 +193,7 @@ Return ONLY the JSON object.`;
     const t1 = setTimeout(() => setLoadMsg("Extracting keywords and rules…"), 1500);
     const t2 = setTimeout(() => setLoadMsg("Grouping thresholds…"), 3000);
     try {
-      const prompt = `You are a compliance document analyst. Analyze this policy document.
+      const prompt = "You are a compliance document analyst. Analyze this policy document.
 
 CRITICAL: Your entire response must be a single raw JSON object. No markdown. No backticks. No explanation. No text before or after. Start your response with { and end with }. Any other output will cause a system error.
 
@@ -232,7 +232,7 @@ Return this exact structure:
 }
 Types: prohibited, permitted, threshold, required, conditional.
 Extract every distinct rule. For thresholds always include the exact amount and period.
-Return ONLY the JSON object.`;
+Return ONLY the JSON object.";
 
       const raw = await callClaude({
         model: "claude-sonnet-4-20250514",
