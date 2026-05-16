@@ -48,7 +48,8 @@ function safeJSON(text) {
 async function callClaude(payload) {
   const res = await fetch("/api/claude", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json",
+               'x-api-key': process.env.ANTHROPIC_API_KEY},
     body: JSON.stringify(payload),
   });
   if (!res.ok) throw new Error(`API error ${res.status}`);
