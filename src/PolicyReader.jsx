@@ -146,7 +146,7 @@ export default function PolicyReader() {
   "Type must be: modified, added, or removed. Return ONLY the JSON object.";
       
       const raw = await callClaude({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-sonnet-4-5",
         max_tokens: 4000,
         messages: [{ role: "user", content: prompt }],
       });
