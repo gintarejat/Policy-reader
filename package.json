@@ -1,5 +1,4 @@
 { 
-  "type": "module"
   "name": "policy-reader",
   "version": "0.1.0",
   "scripts": {
