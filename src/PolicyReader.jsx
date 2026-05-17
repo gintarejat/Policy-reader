@@ -381,7 +381,7 @@ export default function PolicyReader() {
                 ))}
               </div>
             )}
-          </div>
+          </>
         )}
 
         {mode === "analyze" && (
