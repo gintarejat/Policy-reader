@@ -186,7 +186,7 @@ In the React app, point the fetch to `/api/claude` instead of `https://api.anthr
 
 ---
 
-## Known limitations — Beta v0.1
+## Known limitations — Beta v1.0
 
 - **Long documents:** Policies above approximately 15,000 words may exceed token limits. Split the document into sections before pasting.
 - **Scanned PDFs:** The tool accepts plain text only. Scanned PDF images must be converted to text first using an OCR tool before pasting.
@@ -197,7 +197,7 @@ In the React app, point the fetch to `/api/claude` instead of `https://api.anthr
 
 ---
 
-## Roadmap — v0.2 and beyond
+## Roadmap — v2.0 and beyond
 
 - [ ] Secure backend proxy — move API key server-side
 - [ ] Multi-document batch analysis — load 3+ policies simultaneously
