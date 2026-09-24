@@ -1,6 +1,6 @@
 # Policy Reader
 
-**AI-powered compliance document intelligence. Two modes: version comparison and rule extraction.**
+**AI-assisted document analysis (LLM extraction, read-only). Two modes: version comparison and rule extraction.**
 
 Built for compliance officers, MLROs, and legal teams who manage AML, crypto and sanctions policies. Policy Reader cuts the manual work of tracking what changed between policy versions and locating specific rules during live investigations. It speeds up reading; it doesn't replace it.
 
