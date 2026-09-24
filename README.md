@@ -2,13 +2,13 @@
 
 **AI-powered compliance document intelligence. Two modes: version comparison and rule extraction.**
 
-Built for compliance officers, MLROs, and legal teams who manage policy documents across AML, MiCA, AMLD6, and sanctions frameworks. Policy Reader eliminates the manual work of tracking what changed between policy versions and locating specific rules during live investigations.
+Built for compliance officers, MLROs, and legal teams who manage AML, crypto and sanctions policies. Policy Reader cuts the manual work of tracking what changed between policy versions and locating specific rules during live investigations. It speeds up reading; it doesn't replace it.
 
 ---
 
 ## What it does
 
-Compliance policy documents are dense, update frequently, and are almost never structured for fast retrieval. When a regulatory update lands — a new MiCA technical standard, an AMLD6 amendment, an internal control revision — a compliance officer has to read the entire document to find what changed. During a live investigation, finding the specific rule that applies to a crypto mixer or an unhosted wallet means scrolling through 40 pages.
+Compliance policy documents are dense, update frequently, and are almost never structured for fast retrieval. When a regulatory update lands — a new MiCA technical standard, an AMLR delegated act, an internal control revision — a compliance officer has to read the entire document to find what changed. During a live investigation, finding the specific rule that applies to a crypto mixer or an unhosted wallet means scrolling through 40 pages.
 
 Policy Reader solves both problems with two focused modes.
 
@@ -18,9 +18,11 @@ Policy Reader solves both problems with two focused modes.
 
 ### Compare mode
 
-Paste two versions of the same policy. The AI identifies every section that changed, was added, or was removed.
+Paste two versions of the same policy. The AI identifies the sections that changed, were added, or were removed.
 
-Each changed section opens as a side-by-side panel. The previous version appears on the left with exact changed phrases highlighted in red strikethrough. The updated version appears on the right with new phrases highlighted in green. The comparison works at phrase level — not just paragraph level — so a threshold change from EUR 5,000 to EUR 3,000 is visible as a precise inline edit, not a paragraph rewrite.
+Click a changed section to open it as a side-by-side panel: the previous version on the left, the updated version on the right, with the phrases the AI marked as changed highlighted. The AI works at phrase level, so a threshold change from EUR 5,000 to EUR 3,000 can show up as an inline edit rather than a paragraph rewrite.
+
+**Important:** this is not a deterministic diff. The text in both panels is reproduced by the AI, not copied from your documents, so a change can be missed or mis-copied. Check every material change against the original documents. A real word-level diff is on the roadmap.
 
 Section-level change types:
 - **Modified** — section existed in both versions but content changed
@@ -32,9 +34,9 @@ Section-level change types:
 Paste any compliance policy document. The AI reads the full text and returns a structured breakdown across four outputs:
 
 1. **Document overview** — inferred title, document type, jurisdiction, and a 2–3 sentence plain-language scope summary
-2. **Keywords by section** — every section mapped to its key terms; clicking any keyword filters the rules below
-3. **Rules database** — every distinct rule extracted, classified by type, tagged with the section it came from, and grouped by keyword. Rule types: Prohibited / Permitted / Threshold / Required / Conditional
-4. **Thresholds summary table** — every monetary limit, time period, and conditional threshold pulled into one scannable table with section references
+2. **Keywords by section** — each section mapped to its key terms; clicking any keyword filters the rules below
+3. **Rules database** — the distinct rules the AI extracts, classified by type, tagged with the section it came from, and grouped by keyword. Rule types: Prohibited / Permitted / Threshold / Required / Conditional
+4. **Thresholds summary table** — monetary limits, time periods and conditional thresholds the AI finds, in one table with section references
 
 The rules database is fully searchable in real time across keyword, rule text, section title, and type.
 
@@ -50,9 +52,9 @@ The AI reads text and identifies patterns. It does not have institutional contex
 
 **How the human-in-the-loop works in practice:**
 
-In Compare mode, the AI surfaces every changed section and highlights the specific phrases that changed. The officer decides whether a change is material to their current work, whether it affects an ongoing investigation, and whether a policy update requires a workflow change.
+In Compare mode, the AI lists the changed sections and highlights the phrases it identifies as changed. The officer decides whether a change is material to their current work, whether it affects an ongoing investigation, and whether a policy update requires a workflow change.
 
-In Analyze mode, the extracted rules serve as a starting point for investigation, not a definitive answer. When an officer searches for "mixer" and finds a Prohibited rule, they then read the original policy section — linked by section ID — to confirm scope and applicability. The AI saves the time of finding the rule; the officer applies professional judgment in interpreting it.
+In Analyze mode, the extracted rules serve as a starting point for investigation, not a definitive answer. When an officer searches for "mixer" and finds a Prohibited rule, they then read the original policy section — referenced by its section ID — to confirm scope and applicability. The AI saves the time of finding the rule; the officer applies professional judgment in interpreting it.
 
 **What the AI cannot do:**
 
@@ -75,15 +77,16 @@ In Analyze mode, the extracted rules serve as a starting point for investigation
 5. Review the summary bar — total modified / added / removed sections
 6. Click each changed section card to expand the side-by-side diff
 7. Read the old and new text; the changed phrases are highlighted inline
-8. Assess whether any change is material to your current caseload or workflow
-9. Document any material changes in your case management system
+8. Confirm each material change against the original documents (the panel text is AI-reproduced)
+9. Assess whether any change is material to your current caseload or workflow
+10. Document any material changes in your case management system
 ```
 
 Typical use cases:
 - Quarterly policy review cycle — identifying what changed before sign-off
 - Onboarding new team members — showing what the current policy says vs. what a previous version said
 - Regulatory inspection preparation — demonstrating that policy changes were tracked and reviewed
-- Post-regulatory-update review — finding exactly how an AMLD6 amendment changed internal thresholds
+- Post-regulatory-update review — finding how a regulatory change moved internal thresholds
 
 ### Analyze workflow
 
@@ -112,94 +115,58 @@ Typical use cases:
 
 | Layer | Technology |
 |---|---|
-| Frontend | React (JSX) |
+| Frontend | React (JSX), built with Vite |
+| Backend | Vercel serverless proxy `api/claude.js` (keeps the API key server-side) |
 | AI engine | Claude API — `POST /v1/messages` |
-| Model | `claude-sonnet-4-20250514` |
-| Output format | Structured JSON schema |
-| Streaming | Server-sent events for Compare mode |
-| Diff rendering | Custom inline phrase-level highlighter |
-| Styling | CSS variables + Google Fonts (Playfair Display, JetBrains Mono, DM Sans) |
+| Model | `claude-sonnet-4-5`, `max_tokens: 4000` |
+| Output format | JSON requested in the prompt, parsed in the browser |
+| Streaming | None — one request, one response |
+| Change highlighting | Highlights the phrases the AI lists as changed |
+| Styling | Inline styles + Google Fonts (Archivo Black, Special Elite) |
 
 ---
 
 ## Running locally
 
-**Prerequisites:** Node.js 18+, a valid Anthropic API key from `console.anthropic.com`
+**Prerequisites:** Node.js 18+, an Anthropic API key, the Vercel CLI for the API route.
 
 ```bash
-# 1. Create a React project
-npm create vite@latest policy-reader -- --template react
-cd policy-reader
-
-# 2. Replace src/App.jsx with PolicyReader.jsx
-
-# 3. Add your API key to the fetch call in PolicyReader.jsx:
-#    Find the fetch() call and add these headers:
-#    "x-api-key": "sk-ant-api03-YOUR-KEY-HERE",
-#    "anthropic-version": "2023-06-01"
-
-# 4. Install and run
+git clone https://github.com/gintarejat/Policy-reader
+cd Policy-reader
 npm install
-npm run dev
-# → http://localhost:5173
+vercel dev          # runs the Vite app and /api/claude together
+# set ANTHROPIC_API_KEY in Vercel (Project → Settings → Environment Variables)
+# or in a local .env file for vercel dev
 ```
+
+`npm run dev` alone starts the interface, but the analysis calls need `/api/claude`, so use `vercel dev` for full local testing.
 
 ---
 
 ## API key security
 
-The API key must never be in frontend code that is deployed publicly. For local use on your own machine it is acceptable. For any shared or public deployment, move the key to a backend proxy:
-
-```
-Browser → Your backend (Node/Express or Python/FastAPI) → Anthropic API
-                ↑
-         Key stored here as environment variable
-         Never reaches the browser
-```
-
-Minimal Express proxy example:
-
-```js
-// server.js
-const express = require('express');
-const app = express();
-app.use(express.json());
-
-app.post('/api/claude', async (req, res) => {
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': process.env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify(req.body),
-  });
-  const data = await response.json();
-  res.json(data);
-});
-
-app.listen(3001);
-```
-
-In the React app, point the fetch to `/api/claude` instead of `https://api.anthropic.com/v1/messages`.
+The key lives only in Vercel's server-side environment. The browser calls `/api/claude`; `api/claude.js` adds the key and forwards the request to Anthropic. The key is never in the frontend bundle.
 
 ---
 
 ## Known limitations — Beta v1.0
 
-- **Long documents:** Policies above approximately 15,000 words may exceed token limits. Split the document into sections before pasting.
+- **Long documents:** the answer is capped at 4,000 tokens, so a long policy with many rules can produce cut-off JSON (parse error or missing rules). Analyse a few sections at a time.
 - **Scanned PDFs:** The tool accepts plain text only. Scanned PDF images must be converted to text first using an OCR tool before pasting.
-- **Non-English policies:** The AI can read and extract rules in most European languages but the UI labels (badge text, filter names) are in English. Nordic-language policies work well.
+- **Non-English policies:** the model can read most European languages, but this hasn't been systematically tested here, and the UI labels are in English.
 - **Complex table structures:** Rules embedded inside complex HTML or Word tables may not extract cleanly. Paste the text content of tables as plain text.
 - **AI classification errors:** The AI occasionally misclassifies a Conditional rule as Permitted or vice versa. Always verify rule type against the original text for any rule you act on.
-- **API key in frontend:** The current build includes the key directly in the React component. This is suitable for local/portfolio use only — not for shared deployment. See API key security above.
+- **Not a deterministic diff:** Compare-mode text is reproduced by the AI. Verify against the source documents.
+- **No source-sentence trace:** extracted rules show the section ID, not the exact sentence they came from.
+- **No rate limit on the API route** yet.
 
 ---
 
 ## Roadmap — v2.0 and beyond
 
-- [ ] Secure backend proxy — move API key server-side
+- [x] Secure backend proxy — API key server-side
+- [ ] Deterministic word-level diff in Compare mode
+- [ ] Source-sentence trace for every extracted rule
 - [ ] Multi-document batch analysis — load 3+ policies simultaneously
 - [ ] Cross-document conflict detection — flag rules that contradict across policies
 - [ ] Export to PDF and Excel — downloadable rule database and threshold table
@@ -213,24 +180,25 @@ In the React app, point the fetch to `/api/claude` instead of `https://api.anthr
 
 Policy Reader was designed with the following regulatory frameworks in mind. Rules and thresholds extracted by the tool should always be verified against the original text of these instruments:
 
-- **EU AMLD6** (Directive 2018/1673) — AML obligations for obliged entities
+- **AMLD4/5** (Directive (EU) 2015/849) and, from July 2027, **AMLR** (Regulation (EU) 2024/1624) — AML obligations for obliged entities
+- **AMLD6** (Directive (EU) 2018/1673) — criminal-law offences of money laundering
 - **MiCA** (Regulation EU 2023/1114) — Crypto-asset service provider requirements
-- **TFR** (Transfer of Funds Regulation) — Travel Rule data requirements
-- **OFAC 31 CFR** — US sanctions programme obligations
+- **TFR** (Regulation (EU) 2023/1113) — Travel Rule data requirements
+- **OFAC (31 CFR Chapter V)** — US sanctions programme obligations
 - **FATF Recommendations** — International AML/CFT standards
-- **EBA AML/CFT Guidelines** — European Banking Authority guidance for CASPs
+- **EBA ML/TF risk factors guidelines** — European Banking Authority guidance, including for CASPs
 
 ---
 
-## Part of the AFC Intelligence Suite
+## Part of the AML Operating System
 
-Policy Reader is one of three tools in development:
+Policy Reader is one of three live beta tools mapped on the [AML Operating System](https://ajatauaml.com/aml-operating-system.html):
 
-| Tool | Status | Purpose |
+| Tool | Layer | Purpose |
 |---|---|---|
-| SAR Document Generator | Beta v0.1 | AI-generated SAR/STR narratives with L1→L2 QC workflow |
-| Policy Reader | Beta v0.1 | Policy version comparison and rule extraction |
-| Compliance Guides | Draft v0.5 | Six dual-level AML/crypto regulatory reference guides |
+| [Policy Reader](https://github.com/gintarejat/Policy-reader) | 1 · Governance | Policy version comparison and rule extraction |
+| [Scamnot](https://github.com/gintarejat/scamnot) | 3 · Customer lifecycle | OSINT / KYB investigation agent with a human verdict |
+| [SAR Draft Automation](https://github.com/gintarejat/SAR-Draft-Automation) | 5 · Investigation & reporting | SAR/STR drafting workflow with a human review gate |
 
 ---
 

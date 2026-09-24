@@ -58,14 +58,14 @@ async function callClaude(payload) {
 }
 
 const TYPE_CONFIG = {
-  prohibited:  { label: "PROHIBITED",  bg: "#FCEBEB", color: "#791F1F", border: "#F09595" },
-  permitted:   { label: "PERMITTED",   bg: "#EAF3DE", color: "#27500A", border: "#97C459" },
-  threshold:   { label: "THRESHOLD",   bg: "#FAEEDA", color: "#633806", border: "#EF9F27" },
-  required:    { label: "REQUIRED",    bg: "#E6F1FB", color: "#042C53", border: "#85B7EB" },
-  conditional: { label: "CONDITIONAL", bg: "#EDE7FF", color: "#26215C", border: "#CECBF6" },
-  modified:    { label: "MODIFIED",    bg: "#FAEEDA", color: "#633806", border: "#EF9F27" },
-  added:       { label: "ADDED",       bg: "#EAF3DE", color: "#27500A", border: "#97C459" },
-  removed:     { label: "REMOVED",     bg: "#FCEBEB", color: "#791F1F", border: "#F09595" },
+  prohibited:  { label: "PROHIBITED",  bg: "#FDE8E8", color: "#B3070C", border: "#E4161B" },
+  permitted:   { label: "PERMITTED",   bg: "#E3F0E6", color: "#1F7A3A", border: "#1F7A3A" },
+  threshold:   { label: "THRESHOLD",   bg: "#FFF3B0", color: "#141414", border: "#B98900" },
+  required:    { label: "REQUIRED",    bg: "#FFFDF8", color: "#141414", border: "#141414" },
+  conditional: { label: "CONDITIONAL", bg: "#ECE6D8", color: "#141414", border: "#8A857B" },
+  modified:    { label: "MODIFIED",    bg: "#FFF3B0", color: "#141414", border: "#B98900" },
+  added:       { label: "ADDED",       bg: "#E3F0E6", color: "#1F7A3A", border: "#1F7A3A" },
+  removed:     { label: "REMOVED",     bg: "#FDE8E8", color: "#B3070C", border: "#E4161B" },
 };
 
 function Badge({ type }) {
@@ -73,8 +73,8 @@ function Badge({ type }) {
   return (
     <span style={{
       display: "inline-block", fontSize: 9,
-      fontFamily: "'JetBrains Mono', monospace", fontWeight: 600,
-      letterSpacing: "0.1em", padding: "2px 7px", borderRadius: 3,
+      fontFamily: "'Special Elite', 'Courier New', monospace", fontWeight: 600,
+      letterSpacing: "0.1em", padding: "2px 7px", borderRadius: 0,
       background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}`,
     }}>{cfg.label}</span>
   );
@@ -216,49 +216,70 @@ export default function PolicyReader() {
   }, {});
 
   return (
-    <div style={{ fontFamily: "'DM Sans', sans-serif", minHeight: "100vh", background: "#F7F8FA", color: "#0F1117" }}>
+    <div style={{ fontFamily: "'Archivo', system-ui, sans-serif", minHeight: "100vh", background: "#F3EFE6", color: "#141414" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;500;600;700&family=Permanent+Marker&family=Special+Elite&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        textarea { font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.65; resize: vertical; width: 100%; padding: 12px 14px; background: #fff; border: 1px solid #DDE1E7; border-radius: 8px; color: #1C2333; outline: none; transition: border-color 0.15s; }
-        textarea:focus { border-color: #185FA5; }
-        textarea::placeholder { color: #AAB0BA; }
+        textarea { font-family: 'Special Elite', 'Courier New', monospace; font-size: 11px; line-height: 1.65; resize: vertical; width: 100%; padding: 12px 14px; background: #FFFDF8; border: 1px solid #141414; border-radius: 0; color: #141414; outline: none; transition: border-color 0.15s; }
+        textarea:focus { border-color: #E4161B; }
+        textarea::placeholder { color: #8A857B; }
         button { cursor: pointer; transition: all 0.15s; }
-        .diff-del { background: #FDEEEE; color: #7B0000; text-decoration: line-through; text-decoration-color: #C0392B; text-decoration-thickness: 2px; border-radius: 2px; padding: 0 2px; font-weight: 500; }
-        .diff-add { background: #E8F5E1; color: #1A5E2A; border-radius: 2px; padding: 0 2px; font-weight: 500; }
-        .section-card { background: #fff; border: 1px solid #DDE1E7; border-radius: 10px; overflow: hidden; margin-bottom: 12px; }
-        .section-card:hover { border-color: #AAB0BA; }
-        .rule-card { background: #fff; border: 1px solid #E8EAED; border-radius: 8px; padding: 11px 13px; margin-bottom: 8px; }
+        .diff-del { background: #FDE8E8; color: #B3070C; text-decoration: line-through; text-decoration-color: #E4161B; text-decoration-thickness: 2px; border-radius: 0; padding: 0 2px; font-weight: 500; }
+        .diff-add { background: #E3F0E6; color: #1F7A3A; border-radius: 0; padding: 0 2px; font-weight: 500; }
+        .section-card { background: #FFFDF8; border: 1px solid #141414; border-radius: 0; overflow: hidden; margin-bottom: 12px; }
+        .section-card:hover { border-color: #8A857B; }
+        .rule-card { background: #FFFDF8; border: 1px solid #D6CFBF; border-radius: 0; padding: 11px 13px; margin-bottom: 8px; }
         .keyword-group { margin-bottom: 18px; }
         .spin { animation: spin 0.8s linear infinite; display: inline-block; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .fade-in { animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        /* ══ AML Operating System theme ══ */
+        body { background: #F3EFE6; }
+        body::before { content: ""; position: fixed; inset: -50%; pointer-events: none; z-index: 9999; opacity: .18; mix-blend-mode: multiply; animation: grain .5s steps(1) infinite;
+          background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+        @keyframes grain { 0%{transform:translate(0,0)} 25%{transform:translate(-3%,2%)} 50%{transform:translate(2%,-3%)} 75%{transform:translate(-1%,-2%)} }
+        @media (prefers-reduced-motion: reduce) { body::before { animation: none; } }
+        h1 { text-transform: uppercase; letter-spacing: -0.01em; font-weight: 400 !important; }
+        textarea { border-width: 1.5px; }
+        textarea:focus { box-shadow: 3px 3px 0 #FFD60A; }
+        .section-card { border-width: 2px; box-shadow: 4px 5px 0 #141414; transition: transform .18s steps(3,end), box-shadow .18s steps(3,end); }
+        .section-card:hover { border-color: #141414; transform: translate(-2px,-2px); box-shadow: 6px 7px 0 #141414; }
+        .rule-card { border-width: 1.5px; transition: transform .18s steps(3,end), box-shadow .18s steps(3,end); }
+        .rule-card:hover { transform: translate(-2px,-2px); box-shadow: 4px 4px 0 #141414; }
+        button { transition: transform .15s steps(2,end), box-shadow .15s steps(2,end); font-family: 'Archivo Black', sans-serif; letter-spacing: .04em; }
+        button:hover:not(:disabled) { transform: translate(-2px,-2px); box-shadow: 3px 3px 0 #141414; }
+        .diff-add { background: #FFF3B0; }
+        .fade-in { animation: fadeIn .4s steps(4,end); }
+        .aos-back { position: fixed; right: 16px; bottom: 14px; z-index: 10000; font-family: 'Archivo Black', sans-serif; font-size: 12px; letter-spacing: .03em;
+          text-decoration: none; color: #FFFDF8; background: #141414; padding: 7px 11px 6px; transform: rotate(-2deg); box-shadow: 3px 3px 0 #E4161B; }
+        .aos-back:hover { transform: rotate(-2deg) translate(-2px,-2px); box-shadow: 5px 5px 0 #E4161B; }
       `}</style>
+      <a className="aos-back" href="https://ajatauaml.com/aml-operating-system.html">&larr; AML Operating System</a>
 
-      <div style={{ background: "#0D1B2A", padding: "0 28px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 52 }}>
+      <div style={{ background: "#141414", padding: "0 28px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 52 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 28, height: 28, background: "#185FA5", borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ width: 28, height: 28, background: "#E4161B", borderRadius: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <rect x="1" y="1" width="5.5" height="12" rx="1" fill="white" opacity="0.9" />
               <rect x="7.5" y="1" width="5.5" height="12" rx="1" fill="white" opacity="0.5" />
-              <rect x="3" y="3.5" width="2" height="1" fill="#0D1B2A" opacity="0.6" rx="0.5" />
-              <rect x="3" y="5.5" width="2" height="1" fill="#0D1B2A" opacity="0.6" rx="0.5" />
-              <rect x="3" y="7.5" width="2" height="1" fill="#0D1B2A" opacity="0.6" rx="0.5" />
+              <rect x="3" y="3.5" width="2" height="1" fill="#141414" opacity="0.6" rx="0.5" />
+              <rect x="3" y="5.5" width="2" height="1" fill="#141414" opacity="0.6" rx="0.5" />
+              <rect x="3" y="7.5" width="2" height="1" fill="#141414" opacity="0.6" rx="0.5" />
             </svg>
           </div>
-          <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, fontWeight: 600, color: "#fff" }}>Policy Reader</span>
-          <span style={{ fontSize: 9, fontFamily: "'JetBrains Mono', monospace", color: "#4A7FA5", letterSpacing: "0.1em" }}>AFC INTELLIGENCE SUITE</span>
+          <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: 16, fontWeight: 600, color: "#FFFDF8" }}>Policy Reader</span>
+          <span style={{ fontSize: 9, fontFamily: "'Special Elite', 'Courier New', monospace", color: "#FFD60A", letterSpacing: "0.1em" }}>AFC INTELLIGENCE SUITE</span>
         </div>
         <div style={{ display: "flex", gap: 4 }}>
           {["compare", "analyze"].map((m) => (
             <button key={m}
               onClick={() => { setMode(m); setError(""); setSearch(""); }}
               style={{
-                padding: "5px 14px", borderRadius: 5, fontSize: 11, fontWeight: 600,
+                padding: "5px 14px", borderRadius: 0, fontSize: 11, fontWeight: 600,
                 letterSpacing: "0.06em", textTransform: "uppercase", border: "none",
-                background: mode === m ? "#185FA5" : "transparent",
-                color: mode === m ? "#fff" : "#6B8CAE",
+                background: mode === m ? "#E4161B" : "transparent",
+                color: mode === m ? "#FFFDF8" : "#BDB6A6",
               }}>
               {m === "compare" ? "⬡ Compare" : "◈ Analyze"}
             </button>
@@ -271,22 +292,22 @@ export default function PolicyReader() {
         {mode === "compare" && (
           <>
             <div style={{ marginBottom: 16 }}>
-              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, margin: "0 0 4px", color: "#0D1B2A" }}>Policy Version Comparator</h1>
-              <p style={{ margin: 0, fontSize: 12.5, color: "#6B7A8D" }}>Paste two versions of a policy document. The AI identifies every changed section and highlights exactly what was added, removed, or modified.</p>
+              <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: 22, fontWeight: 700, margin: "0 0 4px", color: "#141414" }}>Policy Version Comparator</h1>
+              <p style={{ margin: 0, fontSize: 12.5, color: "#5B564C" }}>Paste two versions of a policy document. The AI lists the changed sections and highlights what it finds added, removed, or modified. The text shown is reproduced by the AI, so check material changes against the originals.</p>
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                  <span style={{ width: 18, height: 18, background: "#FAEEDA", border: "1px solid #EF9F27", borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, color: "#633806" }}>V1</span>
-                  <label style={{ fontSize: 11.5, fontWeight: 600, color: "#344054" }}>Current / Original Policy</label>
+                  <span style={{ width: 18, height: 18, background: "#FFF3B0", border: "1px solid #B98900", borderRadius: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, color: "#141414" }}>V1</span>
+                  <label style={{ fontSize: 11.5, fontWeight: 600, color: "#141414" }}>Current / Original Policy</label>
                 </div>
                 <textarea rows={12} placeholder="Paste Version 1 here…" value={v1} onChange={(e) => setV1(e.target.value)} />
               </div>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                  <span style={{ width: 18, height: 18, background: "#EAF3DE", border: "1px solid #97C459", borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, color: "#27500A" }}>V2</span>
-                  <label style={{ fontSize: 11.5, fontWeight: 600, color: "#344054" }}>Updated / New Policy</label>
+                  <span style={{ width: 18, height: 18, background: "#E3F0E6", border: "1px solid #1F7A3A", borderRadius: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, color: "#1F7A3A" }}>V2</span>
+                  <label style={{ fontSize: 11.5, fontWeight: 600, color: "#141414" }}>Updated / New Policy</label>
                 </div>
                 <textarea rows={12} placeholder="Paste Version 2 here…" value={v2} onChange={(e) => setV2(e.target.value)} />
               </div>
@@ -294,27 +315,27 @@ export default function PolicyReader() {
 
             <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 20 }}>
               <button onClick={runCompare} disabled={loading}
-                style={{ background: loading ? "#ABB2B9" : "#0D1B2A", color: "#fff", border: "none", borderRadius: 7, padding: "9px 20px", fontSize: 12, fontWeight: 600, letterSpacing: "0.04em", display: "flex", alignItems: "center", gap: 7 }}>
+                style={{ background: loading ? "#8A857B" : "#141414", color: "#FFFDF8", border: "none", borderRadius: 0, padding: "9px 20px", fontSize: 12, fontWeight: 600, letterSpacing: "0.04em", display: "flex", alignItems: "center", gap: 7 }}>
                 {loading
-                  ? <><span className="spin" style={{ width: 13, height: 13, border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", display: "inline-block" }} />{loadMsg || "Analysing…"}</>
+                  ? <><span className="spin" style={{ width: 13, height: 13, border: "2px solid rgba(255,253,248,0.3)", borderTopColor: "#FFFDF8", borderRadius: "50%", display: "inline-block" }} />{loadMsg || "Analysing…"}</>
                   : "▶  Run Comparison"}
               </button>
-              <button onClick={loadSample} style={{ background: "transparent", border: "1px solid #DDE1E7", borderRadius: 7, padding: "8px 14px", fontSize: 11.5, color: "#6B7A8D", fontWeight: 500 }}>Load sample policy</button>
+              <button onClick={loadSample} style={{ background: "transparent", border: "1px solid #141414", borderRadius: 0, padding: "8px 14px", fontSize: 11.5, color: "#5B564C", fontWeight: 500 }}>Load sample policy</button>
               {compareResult && (
-                <button onClick={() => setCompareResult(null)} style={{ background: "transparent", border: "1px solid #DDE1E7", borderRadius: 7, padding: "8px 14px", fontSize: 11.5, color: "#6B7A8D" }}>Clear</button>
+                <button onClick={() => setCompareResult(null)} style={{ background: "transparent", border: "1px solid #141414", borderRadius: 0, padding: "8px 14px", fontSize: 11.5, color: "#5B564C" }}>Clear</button>
               )}
             </div>
 
             {error && (
-              <div style={{ background: "#FCEBEB", border: "1px solid #F09595", borderRadius: 7, padding: "9px 13px", fontSize: 12, color: "#791F1F", marginBottom: 14 }}>{error}</div>
+              <div style={{ background: "#FDE8E8", border: "1px solid #E4161B", borderRadius: 0, padding: "9px 13px", fontSize: 12, color: "#B3070C", marginBottom: 14 }}>{error}</div>
             )}
 
             {compareResult && (
               <div className="fade-in">
-                <div style={{ background: "#0D1B2A", borderRadius: 8, padding: "12px 18px", marginBottom: 16, display: "flex", alignItems: "center", gap: 16 }}>
+                <div style={{ background: "#141414", borderRadius: 0, padding: "12px 18px", marginBottom: 16, display: "flex", alignItems: "center", gap: 16 }}>
                   <div>
-                    <div style={{ fontSize: 9, fontFamily: "'JetBrains Mono', monospace", color: "#4A7FA5", letterSpacing: "0.1em", marginBottom: 2 }}>COMPARISON SUMMARY</div>
-                    <div style={{ fontSize: 13, color: "#fff", fontWeight: 500 }}>{compareResult.summary}</div>
+                    <div style={{ fontSize: 9, fontFamily: "'Special Elite', 'Courier New', monospace", color: "#FFD60A", letterSpacing: "0.1em", marginBottom: 2 }}>COMPARISON SUMMARY</div>
+                    <div style={{ fontSize: 13, color: "#FFFDF8", fontWeight: 500 }}>{compareResult.summary}</div>
                   </div>
                   <div style={{ marginLeft: "auto", display: "flex", gap: 12, flexShrink: 0 }}>
                     {["modified", "added", "removed"].map((t) => {
@@ -323,8 +344,8 @@ export default function PolicyReader() {
                       const cfg = TYPE_CONFIG[t];
                       return (
                         <div key={t} style={{ textAlign: "center" }}>
-                          <div style={{ fontSize: 20, fontWeight: 700, color: cfg.border, fontFamily: "'JetBrains Mono', monospace" }}>{count}</div>
-                          <div style={{ fontSize: 8, color: "#6B8CAE", textTransform: "uppercase", letterSpacing: "0.1em" }}>{t}</div>
+                          <div style={{ fontSize: 20, fontWeight: 700, color: cfg.border, fontFamily: "'Special Elite', 'Courier New', monospace" }}>{count}</div>
+                          <div style={{ fontSize: 8, color: "#BDB6A6", textTransform: "uppercase", letterSpacing: "0.1em" }}>{t}</div>
                         </div>
                       );
                     })}
@@ -334,12 +355,12 @@ export default function PolicyReader() {
                 {compareResult.changes?.map((change, i) => (
                   <div key={i} className="section-card">
                     <div
-                      style={{ padding: "10px 16px", display: "flex", alignItems: "center", gap: 10, borderBottom: "1px solid #F0F2F5", cursor: "pointer", background: expandedSection === i ? "#F9FAFB" : "#fff" }}
+                      style={{ padding: "10px 16px", display: "flex", alignItems: "center", gap: 10, borderBottom: "1px solid #ECE6D8", cursor: "pointer", background: expandedSection === i ? "#F7F3EA" : "#FFFDF8" }}
                       onClick={() => setExpandedSection(expandedSection === i ? null : i)}>
                       <Badge type={change.type} />
-                      <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, fontWeight: 600, color: "#0D1B2A", flex: 1 }}>{change.section}</span>
-                      <span style={{ fontSize: 11, color: "#6B7A8D", maxWidth: 340, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{change.summary}</span>
-                      <span style={{ fontSize: 13, color: "#AAB0BA", marginLeft: 6 }}>{expandedSection === i ? "▲" : "▼"}</span>
+                      <span style={{ fontFamily: "'Special Elite', 'Courier New', monospace", fontSize: 11, fontWeight: 600, color: "#141414", flex: 1 }}>{change.section}</span>
+                      <span style={{ fontSize: 11, color: "#5B564C", maxWidth: 340, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{change.summary}</span>
+                      <span style={{ fontSize: 13, color: "#8A857B", marginLeft: 6 }}>{expandedSection === i ? "▲" : "▼"}</span>
                     </div>
 
                     {expandedSection === i && (
@@ -348,10 +369,10 @@ export default function PolicyReader() {
                           {change.type !== "added" && change.old_text && (
                             <div>
                               <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 7 }}>
-                                <span style={{ width: 16, height: 16, background: "#FAEEDA", border: "1px solid #EF9F27", borderRadius: 3, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 700, color: "#633806" }}>V1</span>
-                                <span style={{ fontSize: 10, fontWeight: 600, color: "#854F0B", textTransform: "uppercase" }}>Previous version</span>
+                                <span style={{ width: 16, height: 16, background: "#FFF3B0", border: "1px solid #B98900", borderRadius: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 700, color: "#141414" }}>V1</span>
+                                <span style={{ fontSize: 10, fontWeight: 600, color: "#6B5000", textTransform: "uppercase" }}>Previous version</span>
                               </div>
-                              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10.5, lineHeight: 1.7, color: "#2C1810", background: "#FFFDF7", border: "1px solid #F5D99A", borderLeft: "3px solid #EF9F27", borderRadius: "0 6px 6px 0", padding: "10px 12px" }}>
+                              <div style={{ fontFamily: "'Special Elite', 'Courier New', monospace", fontSize: 10.5, lineHeight: 1.7, color: "#141414", background: "#FFFDF8", border: "1px solid #E6CB5A", borderLeft: "3px solid #B98900", borderRadius: 0, padding: "10px 12px" }}>
                                 {applyHighlights(change.old_text, change.old_highlights, "diff-del")}
                               </div>
                             </div>
@@ -359,18 +380,18 @@ export default function PolicyReader() {
                           {change.type !== "removed" && change.new_text && (
                             <div>
                               <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 7 }}>
-                                <span style={{ width: 16, height: 16, background: "#EAF3DE", border: "1px solid #97C459", borderRadius: 3, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 700, color: "#27500A" }}>V2</span>
-                                <span style={{ fontSize: 10, fontWeight: 600, color: "#3B6D11", textTransform: "uppercase" }}>{change.type === "added" ? "New section" : "Updated version"}</span>
+                                <span style={{ width: 16, height: 16, background: "#E3F0E6", border: "1px solid #1F7A3A", borderRadius: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 700, color: "#1F7A3A" }}>V2</span>
+                                <span style={{ fontSize: 10, fontWeight: 600, color: "#1F7A3A", textTransform: "uppercase" }}>{change.type === "added" ? "New section" : "Updated version"}</span>
                               </div>
-                              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10.5, lineHeight: 1.7, color: "#0D2B0D", background: "#F7FDF5", border: "1px solid #B8E094", borderLeft: "3px solid #639922", borderRadius: "0 6px 6px 0", padding: "10px 12px" }}>
+                              <div style={{ fontFamily: "'Special Elite', 'Courier New', monospace", fontSize: 10.5, lineHeight: 1.7, color: "#141414", background: "#F4FAF5", border: "1px solid #8FC49E", borderLeft: "3px solid #1F7A3A", borderRadius: 0, padding: "10px 12px" }}>
                                 {applyHighlights(change.new_text, change.new_highlights, "diff-add")}
                               </div>
                             </div>
                           )}
                         </div>
                         {change.type === "modified" && ((change.old_highlights?.length || 0) + (change.new_highlights?.length || 0)) > 0 && (
-                          <div style={{ marginTop: 10, padding: "8px 11px", background: "#F7F8FA", borderRadius: 6, display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
-                            <span style={{ fontSize: 9, fontFamily: "'JetBrains Mono', monospace", color: "#AAB0BA", textTransform: "uppercase", letterSpacing: "0.1em", marginRight: 4 }}>Changes:</span>
+                          <div style={{ marginTop: 10, padding: "8px 11px", background: "#F3EFE6", borderRadius: 0, display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
+                            <span style={{ fontSize: 9, fontFamily: "'Special Elite', 'Courier New', monospace", color: "#8A857B", textTransform: "uppercase", letterSpacing: "0.1em", marginRight: 4 }}>Changes:</span>
                             {change.old_highlights?.map((p, j) => <span key={"del" + j} className="diff-del" style={{ fontSize: 9 }}>{p}</span>)}
                             {change.new_highlights?.map((p, j) => <span key={"add" + j} className="diff-add" style={{ fontSize: 9 }}>{p}</span>)}
                           </div>
@@ -387,42 +408,42 @@ export default function PolicyReader() {
         {mode === "analyze" && (
           <>
             <div style={{ marginBottom: 16 }}>
-              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, margin: "0 0 4px", color: "#0D1B2A" }}>Policy Analyser</h1>
-              <p style={{ margin: 0, fontSize: 12.5, color: "#6B7A8D" }}>Paste any compliance policy. The AI extracts keywords by section, then groups every rule, threshold, and restriction into a searchable, structured view.</p>
+              <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: 22, fontWeight: 700, margin: "0 0 4px", color: "#141414" }}>Policy Analyser</h1>
+              <p style={{ margin: 0, fontSize: 12.5, color: "#5B564C" }}>Paste any compliance policy. The AI extracts keywords by section, then groups the rules, thresholds, and restrictions it finds into a searchable, structured view. Check each rule against its section before acting on it.</p>
             </div>
 
             <div style={{ marginBottom: 14 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                <span style={{ width: 18, height: 18, background: "#E6F1FB", border: "1px solid #85B7EB", borderRadius: 4, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, color: "#042C53" }}>◈</span>
-                <label style={{ fontSize: 11.5, fontWeight: 600, color: "#344054" }}>Policy Document</label>
+                <span style={{ width: 18, height: 18, background: "#FFF3B0", border: "1px solid #141414", borderRadius: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, color: "#141414" }}>◈</span>
+                <label style={{ fontSize: 11.5, fontWeight: 600, color: "#141414" }}>Policy Document</label>
               </div>
               <textarea rows={10} placeholder="Paste your policy document here…" value={analyzeText} onChange={(e) => setAnalyzeText(e.target.value)} />
             </div>
 
             <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
               <button onClick={runAnalyze} disabled={loading}
-                style={{ background: loading ? "#ABB2B9" : "#0D1B2A", color: "#fff", border: "none", borderRadius: 7, padding: "9px 20px", fontSize: 12, fontWeight: 600, letterSpacing: "0.04em", display: "flex", alignItems: "center", gap: 7 }}>
+                style={{ background: loading ? "#8A857B" : "#141414", color: "#FFFDF8", border: "none", borderRadius: 0, padding: "9px 20px", fontSize: 12, fontWeight: 600, letterSpacing: "0.04em", display: "flex", alignItems: "center", gap: 7 }}>
                 {loading
-                  ? <><span className="spin" style={{ width: 13, height: 13, border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", display: "inline-block" }} />{loadMsg || "Analysing…"}</>
+                  ? <><span className="spin" style={{ width: 13, height: 13, border: "2px solid rgba(255,253,248,0.3)", borderTopColor: "#FFFDF8", borderRadius: "50%", display: "inline-block" }} />{loadMsg || "Analysing…"}</>
                   : "▶  Analyse Policy"}
               </button>
-              <button onClick={loadSample} style={{ background: "transparent", border: "1px solid #DDE1E7", borderRadius: 7, padding: "8px 14px", fontSize: 11.5, color: "#6B7A8D", fontWeight: 500 }}>Load sample policy</button>
+              <button onClick={loadSample} style={{ background: "transparent", border: "1px solid #141414", borderRadius: 0, padding: "8px 14px", fontSize: 11.5, color: "#5B564C", fontWeight: 500 }}>Load sample policy</button>
               {analyzeResult && (
                 <button onClick={() => { setAnalyzeResult(null); setSearch(""); }}
-                  style={{ background: "transparent", border: "1px solid #DDE1E7", borderRadius: 7, padding: "8px 14px", fontSize: 11.5, color: "#6B7A8D" }}>Clear</button>
+                  style={{ background: "transparent", border: "1px solid #141414", borderRadius: 0, padding: "8px 14px", fontSize: 11.5, color: "#5B564C" }}>Clear</button>
               )}
             </div>
 
             {error && (
-              <div style={{ background: "#FCEBEB", border: "1px solid #F09595", borderRadius: 7, padding: "9px 13px", fontSize: 12, color: "#791F1F", marginBottom: 14 }}>{error}</div>
+              <div style={{ background: "#FDE8E8", border: "1px solid #E4161B", borderRadius: 0, padding: "9px 13px", fontSize: 12, color: "#B3070C", marginBottom: 14 }}>{error}</div>
             )}
 
             {analyzeResult && (
               <div className="fade-in">
-                <div style={{ background: "#0D1B2A", borderRadius: 10, padding: "16px 20px", marginBottom: 16, display: "grid", gridTemplateColumns: "1fr 1fr 1fr auto", gap: 20, alignItems: "start" }}>
-                  <div style={{ gridColumn: "1 / -1", borderBottom: "1px solid #1E3550", paddingBottom: 10, marginBottom: 4 }}>
-                    <div style={{ fontSize: 9, fontFamily: "'JetBrains Mono', monospace", color: "#4A7FA5", letterSpacing: "0.1em", marginBottom: 3 }}>DOCUMENT IDENTIFIED</div>
-                    <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, fontWeight: 700, color: "#fff" }}>{analyzeResult.document_title || "Policy Document"}</div>
+                <div style={{ background: "#141414", borderRadius: 0, padding: "16px 20px", marginBottom: 16, display: "grid", gridTemplateColumns: "1fr 1fr 1fr auto", gap: 20, alignItems: "start" }}>
+                  <div style={{ gridColumn: "1 / -1", borderBottom: "1px solid #3A3630", paddingBottom: 10, marginBottom: 4 }}>
+                    <div style={{ fontSize: 9, fontFamily: "'Special Elite', 'Courier New', monospace", color: "#FFD60A", letterSpacing: "0.1em", marginBottom: 3 }}>DOCUMENT IDENTIFIED</div>
+                    <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: 17, fontWeight: 700, color: "#FFFDF8" }}>{analyzeResult.document_title || "Policy Document"}</div>
                   </div>
                   {[
                     ["Type", analyzeResult.document_type],
@@ -431,26 +452,26 @@ export default function PolicyReader() {
                     ["Rules extracted", (analyzeResult.rules?.length || 0) + " rules"],
                   ].map(([k, v]) => (
                     <div key={k}>
-                      <div style={{ fontSize: 8.5, fontFamily: "'JetBrains Mono', monospace", color: "#4A7FA5", letterSpacing: "0.1em", marginBottom: 3 }}>{k.toUpperCase()}</div>
-                      <div style={{ fontSize: 12, color: "#E0E8F0", fontWeight: 500 }}>{v}</div>
+                      <div style={{ fontSize: 8.5, fontFamily: "'Special Elite', 'Courier New', monospace", color: "#FFD60A", letterSpacing: "0.1em", marginBottom: 3 }}>{k.toUpperCase()}</div>
+                      <div style={{ fontSize: 12, color: "#FFFDF8", fontWeight: 500 }}>{v}</div>
                     </div>
                   ))}
-                  <div style={{ gridColumn: "1 / -1", paddingTop: 8, borderTop: "1px solid #1E3550" }}>
-                    <div style={{ fontSize: 8.5, fontFamily: "'JetBrains Mono', monospace", color: "#4A7FA5", letterSpacing: "0.1em", marginBottom: 5 }}>SCOPE SUMMARY</div>
-                    <div style={{ fontSize: 12, color: "#B8C8D8", lineHeight: 1.6 }}>{analyzeResult.scope_summary}</div>
+                  <div style={{ gridColumn: "1 / -1", paddingTop: 8, borderTop: "1px solid #3A3630" }}>
+                    <div style={{ fontSize: 8.5, fontFamily: "'Special Elite', 'Courier New', monospace", color: "#FFD60A", letterSpacing: "0.1em", marginBottom: 5 }}>SCOPE SUMMARY</div>
+                    <div style={{ fontSize: 12, color: "#D8D2C4", lineHeight: 1.6 }}>{analyzeResult.scope_summary}</div>
                   </div>
                 </div>
 
-                <div style={{ background: "#fff", border: "1px solid #DDE1E7", borderRadius: 10, padding: "14px 16px", marginBottom: 14 }}>
-                  <div style={{ fontSize: 10, fontFamily: "'JetBrains Mono', monospace", fontWeight: 600, color: "#6B7A8D", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 11 }}>Keywords by Section</div>
+                <div style={{ background: "#FFFDF8", border: "1px solid #141414", borderRadius: 0, padding: "14px 16px", marginBottom: 14 }}>
+                  <div style={{ fontSize: 10, fontFamily: "'Special Elite', 'Courier New', monospace", fontWeight: 600, color: "#5B564C", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 11 }}>Keywords by Section</div>
                   {analyzeResult.sections?.map((sec) => (
-                    <div key={sec.id} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "7px 0", borderBottom: "0.5px solid #F0F2F5" }}>
-                      <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, fontWeight: 600, color: "#185FA5", minWidth: 28, paddingTop: 2 }}>§{sec.id}</span>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: "#344054", minWidth: 180, paddingTop: 2 }}>{sec.title}</span>
+                    <div key={sec.id} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "7px 0", borderBottom: "0.5px solid #ECE6D8" }}>
+                      <span style={{ fontFamily: "'Special Elite', 'Courier New', monospace", fontSize: 10, fontWeight: 600, color: "#E4161B", minWidth: 28, paddingTop: 2 }}>§{sec.id}</span>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: "#141414", minWidth: 180, paddingTop: 2 }}>{sec.title}</span>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
                         {sec.keywords?.map((kw) => (
                           <button key={kw} onClick={() => setSearch(kw)}
-                            style={{ fontSize: 9, fontFamily: "'JetBrains Mono', monospace", padding: "2px 8px", borderRadius: 10, background: "#F0F4FF", border: "1px solid #C5D2F0", color: "#1E3A8A", cursor: "pointer", fontWeight: 500 }}>
+                            style={{ fontSize: 9, fontFamily: "'Special Elite', 'Courier New', monospace", padding: "2px 8px", borderRadius: 0, background: "#FFF3B0", border: "1px solid #141414", color: "#141414", cursor: "pointer", fontWeight: 500 }}>
                             {kw}
                           </button>
                         ))}
@@ -460,18 +481,18 @@ export default function PolicyReader() {
                 </div>
 
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12, alignItems: "center" }}>
-                  <span style={{ fontSize: 10, color: "#6B7A8D", marginRight: 4 }}>Filter by rule type:</span>
+                  <span style={{ fontSize: 10, color: "#5B564C", marginRight: 4 }}>Filter by rule type:</span>
                   {Object.entries(TYPE_CONFIG)
                     .filter(([k]) => ["prohibited", "permitted", "threshold", "required", "conditional"].includes(k))
                     .map(([k, cfg]) => (
                       <button key={k} onClick={() => setSearch(k)}
-                        style={{ fontSize: 9, fontFamily: "'JetBrains Mono', monospace", padding: "3px 9px", borderRadius: 10, background: cfg.bg, border: `1px solid ${cfg.border}`, color: cfg.color, cursor: "pointer", fontWeight: 600, letterSpacing: "0.06em" }}>
+                        style={{ fontSize: 9, fontFamily: "'Special Elite', 'Courier New', monospace", padding: "3px 9px", borderRadius: 0, background: cfg.bg, border: `1px solid ${cfg.border}`, color: cfg.color, cursor: "pointer", fontWeight: 600, letterSpacing: "0.06em" }}>
                         {cfg.label}
                       </button>
                     ))}
                   {search && (
                     <button onClick={() => setSearch("")}
-                      style={{ fontSize: 9, padding: "3px 9px", borderRadius: 10, background: "#F0F2F5", border: "1px solid #DDE1E7", color: "#6B7A8D", cursor: "pointer" }}>
+                      style={{ fontSize: 9, padding: "3px 9px", borderRadius: 0, background: "#ECE6D8", border: "1px solid #141414", color: "#5B564C", cursor: "pointer" }}>
                       ✕ Clear filter
                     </button>
                   )}
@@ -480,21 +501,21 @@ export default function PolicyReader() {
                 <div style={{ position: "relative", marginBottom: 14 }}>
                   <input type="text" placeholder="Search rules by keyword, section, or type…" value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    style={{ width: "100%", padding: "9px 12px 9px 34px", borderRadius: 8, border: "1px solid #DDE1E7", fontSize: 12, background: "#fff", outline: "none", fontFamily: "'DM Sans', sans-serif" }} />
-                  <span style={{ position: "absolute", left: 11, top: 10, fontSize: 14, color: "#AAB0BA" }}>⌕</span>
-                  <span style={{ position: "absolute", right: 12, top: 10, fontSize: 10, color: "#AAB0BA", fontFamily: "'JetBrains Mono', monospace" }}>{filteredRules.length} rules</span>
+                    style={{ width: "100%", padding: "9px 12px 9px 34px", borderRadius: 0, border: "1px solid #141414", fontSize: 12, background: "#FFFDF8", outline: "none", fontFamily: "'Archivo', system-ui, sans-serif" }} />
+                  <span style={{ position: "absolute", left: 11, top: 10, fontSize: 14, color: "#8A857B" }}>⌕</span>
+                  <span style={{ position: "absolute", right: 12, top: 10, fontSize: 10, color: "#8A857B", fontFamily: "'Special Elite', 'Courier New', monospace" }}>{filteredRules.length} rules</span>
                 </div>
 
                 {Object.keys(groupedRules).length === 0 && (
-                  <div style={{ textAlign: "center", padding: "24px", color: "#AAB0BA", fontSize: 12 }}>No rules match your search.</div>
+                  <div style={{ textAlign: "center", padding: "24px", color: "#8A857B", fontSize: 12 }}>No rules match your search.</div>
                 )}
 
                 {Object.entries(groupedRules).map(([keyword, rules]) => (
                   <div key={keyword} className="keyword-group">
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 7 }}>
-                      <div style={{ height: 1, flex: 1, background: "#E8EAED" }} />
-                      <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, fontWeight: 600, color: "#185FA5", letterSpacing: "0.08em", background: "#EFF4FF", border: "1px solid #C5D2F0", borderRadius: 10, padding: "2px 10px" }}># {keyword}</span>
-                      <div style={{ height: 1, flex: 1, background: "#E8EAED" }} />
+                      <div style={{ height: 1, flex: 1, background: "#D6CFBF" }} />
+                      <span style={{ fontFamily: "'Special Elite', 'Courier New', monospace", fontSize: 10, fontWeight: 600, color: "#E4161B", letterSpacing: "0.08em", background: "#FFF3B0", border: "1px solid #141414", borderRadius: 0, padding: "2px 10px" }}># {keyword}</span>
+                      <div style={{ height: 1, flex: 1, background: "#D6CFBF" }} />
                     </div>
                     {rules.map((rule, i) => {
                       const cfg = TYPE_CONFIG[rule.type?.toLowerCase()] || TYPE_CONFIG.conditional;
@@ -502,18 +523,18 @@ export default function PolicyReader() {
                         <div key={i} className="rule-card" style={{ borderLeft: `3px solid ${cfg.border}` }}>
                           <div style={{ display: "flex", alignItems: "flex-start", gap: 8, marginBottom: 6 }}>
                             <Badge type={rule.type} />
-                            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: "#185FA5", background: "#EFF4FF", border: "1px solid #C5D2F0", borderRadius: 3, padding: "2px 6px" }}>
+                            <span style={{ fontFamily: "'Special Elite', 'Courier New', monospace", fontSize: 9, color: "#E4161B", background: "#FFF3B0", border: "1px solid #141414", borderRadius: 0, padding: "2px 6px" }}>
                               §{rule.section_id} — {rule.section_title}
                             </span>
                             {rule.applies_to && (
-                              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: "#6B7A8D", marginLeft: "auto" }}>applies to: {rule.applies_to}</span>
+                              <span style={{ fontFamily: "'Special Elite', 'Courier New', monospace", fontSize: 9, color: "#5B564C", marginLeft: "auto" }}>applies to: {rule.applies_to}</span>
                             )}
                           </div>
-                          <div style={{ fontSize: 12, lineHeight: 1.6, color: "#1C2333" }}>{rule.rule_text}</div>
+                          <div style={{ fontSize: 12, lineHeight: 1.6, color: "#141414" }}>{rule.rule_text}</div>
                           {rule.threshold && (
-                            <div style={{ marginTop: 7, display: "inline-flex", alignItems: "center", gap: 5, background: "#FAEEDA", border: "1px solid #EF9F27", borderRadius: 4, padding: "3px 9px" }}>
-                              <span style={{ fontSize: 9, fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, color: "#633806", textTransform: "uppercase", letterSpacing: "0.08em" }}>THRESHOLD</span>
-                              <span style={{ fontSize: 11, fontFamily: "'JetBrains Mono', monospace", fontWeight: 600, color: "#854F0B" }}>{rule.threshold}</span>
+                            <div style={{ marginTop: 7, display: "inline-flex", alignItems: "center", gap: 5, background: "#FFF3B0", border: "1px solid #B98900", borderRadius: 0, padding: "3px 9px" }}>
+                              <span style={{ fontSize: 9, fontFamily: "'Special Elite', 'Courier New', monospace", fontWeight: 700, color: "#141414", textTransform: "uppercase", letterSpacing: "0.08em" }}>THRESHOLD</span>
+                              <span style={{ fontSize: 11, fontFamily: "'Special Elite', 'Courier New', monospace", fontWeight: 600, color: "#6B5000" }}>{rule.threshold}</span>
                             </div>
                           )}
                         </div>
@@ -523,27 +544,27 @@ export default function PolicyReader() {
                 ))}
 
                 {analyzeResult.thresholds_summary?.length > 0 && (
-                  <div style={{ background: "#fff", border: "1px solid #DDE1E7", borderRadius: 10, padding: "14px 16px", marginTop: 6 }}>
-                    <div style={{ fontSize: 10, fontFamily: "'JetBrains Mono', monospace", fontWeight: 600, color: "#6B7A8D", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 10 }}>Thresholds Summary</div>
+                  <div style={{ background: "#FFFDF8", border: "1px solid #141414", borderRadius: 0, padding: "14px 16px", marginTop: 6 }}>
+                    <div style={{ fontSize: 10, fontFamily: "'Special Elite', 'Courier New', monospace", fontWeight: 600, color: "#5B564C", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 10 }}>Thresholds Summary</div>
                     <div style={{ overflowX: "auto" }}>
                       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
                         <thead>
-                          <tr style={{ background: "#F7F8FA" }}>
+                          <tr style={{ background: "#F3EFE6" }}>
                             {["§", "Section", "Subject", "Limit", "Condition"].map((h) => (
-                              <th key={h} style={{ padding: "6px 10px", textAlign: "left", fontSize: 9, fontFamily: "'JetBrains Mono', monospace", color: "#6B7A8D", fontWeight: 600, letterSpacing: "0.08em", borderBottom: "1px solid #E8EAED" }}>{h.toUpperCase()}</th>
+                              <th key={h} style={{ padding: "6px 10px", textAlign: "left", fontSize: 9, fontFamily: "'Special Elite', 'Courier New', monospace", color: "#5B564C", fontWeight: 600, letterSpacing: "0.08em", borderBottom: "1px solid #D6CFBF" }}>{h.toUpperCase()}</th>
                             ))}
                           </tr>
                         </thead>
                         <tbody>
                           {analyzeResult.thresholds_summary.map((t, i) => (
-                            <tr key={i} style={{ borderBottom: "0.5px solid #F0F2F5" }}>
-                              <td style={{ padding: "7px 10px", fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: "#185FA5", fontWeight: 600 }}>§{t.section_id}</td>
-                              <td style={{ padding: "7px 10px", color: "#344054", fontWeight: 500 }}>{t.section_title}</td>
-                              <td style={{ padding: "7px 10px", color: "#344054" }}>{t.subject}</td>
+                            <tr key={i} style={{ borderBottom: "0.5px solid #ECE6D8" }}>
+                              <td style={{ padding: "7px 10px", fontFamily: "'Special Elite', 'Courier New', monospace", fontSize: 10, color: "#E4161B", fontWeight: 600 }}>§{t.section_id}</td>
+                              <td style={{ padding: "7px 10px", color: "#141414", fontWeight: 500 }}>{t.section_title}</td>
+                              <td style={{ padding: "7px 10px", color: "#141414" }}>{t.subject}</td>
                               <td style={{ padding: "7px 10px" }}>
-                                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, fontWeight: 700, color: "#854F0B", background: "#FAEEDA", border: "1px solid #EF9F27", borderRadius: 3, padding: "1px 6px" }}>{t.limit}</span>
+                                <span style={{ fontFamily: "'Special Elite', 'Courier New', monospace", fontSize: 11, fontWeight: 700, color: "#6B5000", background: "#FFF3B0", border: "1px solid #B98900", borderRadius: 0, padding: "1px 6px" }}>{t.limit}</span>
                               </td>
-                              <td style={{ padding: "7px 10px", color: "#6B7A8D", fontSize: 11 }}>{t.condition || "—"}</td>
+                              <td style={{ padding: "7px 10px", color: "#5B564C", fontSize: 11 }}>{t.condition || "—"}</td>
                             </tr>
                           ))}
                         </tbody>
