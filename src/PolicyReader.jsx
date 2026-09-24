@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { comparePolicies } from "./policyDiff";
 
 const SAMPLE_V1 = `SECTION 1 — SCOPE AND APPLICATION
 This policy applies to all customer accounts opened after 1 January 2023. Daily transaction limits are set at EUR 5,000 for standard accounts. Customers must provide full KYC documentation within 30 days of account opening. Non-compliance results in account restriction.
@@ -79,28 +80,15 @@ function Badge({ type }) {
   );
 }
 
-function applyHighlights(text, phrases, cls) {
-  if (!phrases || phrases.length === 0) return <span>{text}</span>;
-  let parts = [text];
-  phrases.forEach((phrase) => {
-    if (!phrase || phrase.length < 3) return;
-    const next = [];
-    parts.forEach((p) => {
-      if (typeof p !== "string") { next.push(p); return; }
-      const idx = p.toLowerCase().indexOf(phrase.toLowerCase());
-      if (idx === -1) { next.push(p); return; }
-      next.push(p.slice(0, idx));
-      next.push(
-        <span key={phrase + idx} className={cls}>
-          {p.slice(idx, idx + phrase.length)}
-        </span>
-      );
-      next.push(p.slice(idx + phrase.length));
-    });
-    parts = next;
-  });
-  return <>{parts}</>;
+// Render one side of a code-computed diff: V1 shows equal + deleted runs, V2 shows equal + inserted runs.
+function renderOps(ops, side) {
+  const skip = side === "old" ? "ins" : "del";
+  const cls = side === "old" ? "diff-del" : "diff-add";
+  return ops.filter((o) => o.t !== skip).map((o, k) =>
+    o.t === "eq" ? <span key={k}>{o.s}</span> : <span key={k} className={cls}>{o.s}</span>);
 }
+
+const clip = (s, n) => (s.length > n ? s.slice(0, n) + "…" : s);
 
 export default function PolicyReader() {
   const [mode, setMode] = useState("compare");
@@ -130,31 +118,41 @@ export default function PolicyReader() {
       return;
     }
     setError("");
+    setExpandedSection(null);
+
+    // 1. The comparison itself is deterministic code, run in the browser on the pasted text.
+    const diff = comparePolicies(v1, v2);
+    const base = { ...diff, summary: null, sectionSummaries: {}, ai: diff.changes.length ? "loading" : "none" };
+    setCompareResult(base);
+    if (!diff.changes.length) return;
+
+    // 2. The AI only labels what the code found: one sentence per changed section.
     setLoading(true);
-    setCompareResult(null);
-    setLoadMsg("Reading Version 1…");
-    const t1 = setTimeout(() => setLoadMsg("Comparing sections…"), 1200);
-    const t2 = setTimeout(() => setLoadMsg("Identifying changes…"), 2500);
+    setLoadMsg("Writing change summaries…");
     try {
-   const prompt = "You are a compliance document analyst. Compare these two policy versions precisely.\n\n" +
-  "VERSION 1:\n" + v1 + "\n\n" +
-  "VERSION 2:\n" + v2 + "\n\n" +
-  "CRITICAL: Your entire response must be a single raw JSON object. No markdown. No backticks. No explanation. No text before or after. Start with { and end with }.\n\n" +
-  "Return this exact structure:\n" +
-  '{"summary":"1-2 sentence overall summary","total_changes":4,"changes":[{"section":"Section 19 — Crypto Asset Controls","type":"modified","summary":"One sentence","old_text":"Full text from V1","new_text":"Full text from V2","old_highlights":["changed phrase"],"new_highlights":["new phrase"]}]}\n\n' +
-  "Type must be: modified, added, or removed. Return ONLY the JSON object.";
-      
+      const listing = diff.changes.map((c, i) => {
+        const detail = c.type === "modified"
+          ? c.blocks.slice(0, 25).map((b) => `  - "${clip(b.old, 200)}" → "${clip(b.new, 200)}"`).join("\n")
+          : "  " + clip(c.type === "added" ? c.newText : c.oldText, 1200);
+        return `[${i}] ${c.type.toUpperCase()} — ${c.section}\n${detail}`;
+      }).join("\n\n");
+      const prompt = "You are a compliance document analyst. A word-level diff of two policy versions has already been computed. " +
+        "Below are the changed sections with each change shown as \"old\" → \"new\" (empty means nothing).\n\n" + listing + "\n\n" +
+        "Write a plain-language summary. Describe only the listed changes; do not add, infer or restate policy text. " +
+        "Return ONLY a JSON object, no markdown: " +
+        '{"summary":"1-2 sentence overall summary","sections":[{"id":0,"summary":"one sentence on what changed in this section"}]}';
       const raw = await callClaude({
         model: "claude-sonnet-4-5",
-        max_tokens: 4000,
+        max_tokens: 1500,
         messages: [{ role: "user", content: prompt }],
       });
-      setCompareResult(safeJSON(raw));
+      const json = safeJSON(raw);
+      const sectionSummaries = {};
+      (json.sections || []).forEach((s) => { if (Number.isInteger(s.id)) sectionSummaries[s.id] = s.summary; });
+      setCompareResult({ ...base, summary: json.summary || null, sectionSummaries, ai: "done" });
     } catch (e) {
-      setError("Analysis failed: " + e.message);
+      setCompareResult({ ...base, ai: "error", aiError: e.message });
     } finally {
-      clearTimeout(t1);
-      clearTimeout(t2);
       setLoading(false);
       setLoadMsg("");
     }
@@ -249,6 +247,8 @@ export default function PolicyReader() {
         button { transition: transform .15s steps(2,end), box-shadow .15s steps(2,end); font-family: 'Archivo Black', sans-serif; letter-spacing: .04em; }
         button:hover:not(:disabled) { transform: translate(-2px,-2px); box-shadow: 3px 3px 0 #141414; }
         .diff-add { background: #FFF3B0; }
+        .num-flag { font-family: 'Archivo Black', sans-serif; font-size: 9px; letter-spacing: .06em; background: #E4161B; color: #FFFDF8; padding: 2px 7px; transform: rotate(-2deg); }
+        .chg-chip { font-family: 'Special Elite', 'Courier New', monospace; font-size: 9.5px; background: #FFFDF8; border: 1px solid #D6CFBF; padding: 2px 6px; }
         .fade-in { animation: fadeIn .4s steps(4,end); }
         .aos-back { position: fixed; right: 16px; bottom: 14px; z-index: 10000; font-family: 'Archivo Black', sans-serif; font-size: 12px; letter-spacing: .03em;
           text-decoration: none; color: #FFFDF8; background: #141414; padding: 7px 11px 6px; transform: rotate(-2deg); box-shadow: 3px 3px 0 #E4161B; }
@@ -292,7 +292,7 @@ export default function PolicyReader() {
           <>
             <div style={{ marginBottom: 16 }}>
               <h1 style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: 22, fontWeight: 700, margin: "0 0 4px", color: "#141414" }}>Policy Version Comparator</h1>
-              <p style={{ margin: 0, fontSize: 12.5, color: "#5B564C" }}>Paste two versions of a policy document. The AI lists the changed sections and highlights what it finds added, removed, or modified. The text shown is reproduced by the AI, so check material changes against the originals.</p>
+              <p style={{ margin: 0, fontSize: 12.5, color: "#5B564C" }}>Paste two versions of a policy document. The comparison is a word-level diff computed in your browser from the text you pasted: every highlighted word is from your documents. The AI only writes a one-line summary of each changed section.</p>
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
@@ -333,12 +333,24 @@ export default function PolicyReader() {
               <div className="fade-in">
                 <div style={{ background: "#141414", borderRadius: 0, padding: "12px 18px", marginBottom: 16, display: "flex", alignItems: "center", gap: 16 }}>
                   <div>
-                    <div style={{ fontSize: 9, fontFamily: "'Special Elite', 'Courier New', monospace", color: "#FFD60A", letterSpacing: "0.1em", marginBottom: 2 }}>COMPARISON SUMMARY</div>
-                    <div style={{ fontSize: 13, color: "#FFFDF8", fontWeight: 500 }}>{compareResult.summary}</div>
+                    <div style={{ fontSize: 9, fontFamily: "'Special Elite', 'Courier New', monospace", color: "#FFD60A", letterSpacing: "0.1em", marginBottom: 2 }}>
+                      {compareResult.summary ? "COMPARISON SUMMARY · AI-WRITTEN" : "COMPARISON RESULT"}
+                    </div>
+                    <div style={{ fontSize: 13, color: "#FFFDF8", fontWeight: 500 }}>
+                      {compareResult.summary
+                        || (compareResult.changes.length
+                          ? `${compareResult.changes.length} section${compareResult.changes.length > 1 ? "s" : ""} changed, ${compareResult.unchanged} unchanged.`
+                          : "No differences found: both versions contain the same text.")}
+                    </div>
+                    <div style={{ fontSize: 10, color: "#BDB6A6", marginTop: 4, fontFamily: "'Special Elite', 'Courier New', monospace" }}>
+                      Diff computed by code from your text · {compareResult.unchanged} section{compareResult.unchanged === 1 ? "" : "s"} unchanged
+                      {compareResult.ai === "loading" && " · AI summaries loading…"}
+                      {compareResult.ai === "error" && ` · AI summaries unavailable (${compareResult.aiError}); the diff below is complete`}
+                    </div>
                   </div>
                   <div style={{ marginLeft: "auto", display: "flex", gap: 12, flexShrink: 0 }}>
                     {["modified", "added", "removed"].map((t) => {
-                      const count = compareResult.changes?.filter((c) => c.type === t).length || 0;
+                      const count = compareResult.changes.filter((c) => c.type === t).length;
                       if (!count) return null;
                       const cfg = TYPE_CONFIG[t];
                       return (
@@ -351,48 +363,57 @@ export default function PolicyReader() {
                   </div>
                 </div>
 
-                {compareResult.changes?.map((change, i) => (
+                {compareResult.changes.map((change, i) => (
                   <div key={i} className="section-card">
                     <div
-                      style={{ padding: "10px 16px", display: "flex", alignItems: "center", gap: 10, borderBottom: "1px solid #ECE6D8", cursor: "pointer", background: expandedSection === i ? "#F7F3EA" : "#FFFDF8" }}
+                      style={{ padding: "10px 16px", display: "flex", alignItems: "center", flexWrap: "wrap", gap: 10, borderBottom: "1px solid #ECE6D8", cursor: "pointer", background: expandedSection === i ? "#F7F3EA" : "#FFFDF8" }}
                       onClick={() => setExpandedSection(expandedSection === i ? null : i)}>
                       <Badge type={change.type} />
-                      <span style={{ fontFamily: "'Special Elite', 'Courier New', monospace", fontSize: 11, fontWeight: 600, color: "#141414", flex: 1 }}>{change.section}</span>
-                      <span style={{ fontSize: 11, color: "#5B564C", maxWidth: 340, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{change.summary}</span>
+                      {change.numeric && <span className="num-flag" title="A number (amount, limit, period) was changed, added or removed in this section">NUMBER CHANGED</span>}
+                      <span style={{ fontFamily: "'Special Elite', 'Courier New', monospace", fontSize: 11, fontWeight: 600, color: "#141414", flex: 1, minWidth: 160 }}>{change.section}</span>
+                      <span style={{ fontSize: 11, color: "#5B564C", maxWidth: 340, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {compareResult.sectionSummaries[i]
+                          || (change.type === "modified" ? `${change.blocks.length} change${change.blocks.length === 1 ? "" : "s"}` : change.type === "added" ? "New in Version 2" : "Not in Version 2")}
+                      </span>
                       <span style={{ fontSize: 13, color: "#8A857B", marginLeft: 6 }}>{expandedSection === i ? "▲" : "▼"}</span>
                     </div>
 
                     {expandedSection === i && (
                       <div style={{ padding: "14px 16px" }}>
                         <div style={{ display: "grid", gridTemplateColumns: change.type === "added" || change.type === "removed" ? "1fr" : "1fr 1fr", gap: 12 }}>
-                          {change.type !== "added" && change.old_text && (
+                          {change.type !== "added" && (
                             <div>
                               <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 7 }}>
                                 <span style={{ width: 16, height: 16, background: "#FFF3B0", border: "1px solid #B98900", borderRadius: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 700, color: "#141414" }}>V1</span>
                                 <span style={{ fontSize: 10, fontWeight: 600, color: "#6B5000", textTransform: "uppercase" }}>Previous version</span>
                               </div>
-                              <div style={{ fontFamily: "'Special Elite', 'Courier New', monospace", fontSize: 10.5, lineHeight: 1.7, color: "#141414", background: "#FFFDF8", border: "1px solid #E6CB5A", borderLeft: "3px solid #B98900", borderRadius: 0, padding: "10px 12px" }}>
-                                {applyHighlights(change.old_text, change.old_highlights, "diff-del")}
+                              <div style={{ fontFamily: "'Special Elite', 'Courier New', monospace", fontSize: 10.5, lineHeight: 1.7, color: "#141414", background: "#FFFDF8", border: "1px solid #E6CB5A", borderLeft: "3px solid #B98900", borderRadius: 0, padding: "10px 12px", whiteSpace: "pre-wrap" }}>
+                                {renderOps(change.ops, "old")}
                               </div>
                             </div>
                           )}
-                          {change.type !== "removed" && change.new_text && (
+                          {change.type !== "removed" && (
                             <div>
                               <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 7 }}>
                                 <span style={{ width: 16, height: 16, background: "#E3F0E6", border: "1px solid #1F7A3A", borderRadius: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 700, color: "#1F7A3A" }}>V2</span>
                                 <span style={{ fontSize: 10, fontWeight: 600, color: "#1F7A3A", textTransform: "uppercase" }}>{change.type === "added" ? "New section" : "Updated version"}</span>
                               </div>
-                              <div style={{ fontFamily: "'Special Elite', 'Courier New', monospace", fontSize: 10.5, lineHeight: 1.7, color: "#141414", background: "#F4FAF5", border: "1px solid #8FC49E", borderLeft: "3px solid #1F7A3A", borderRadius: 0, padding: "10px 12px" }}>
-                                {applyHighlights(change.new_text, change.new_highlights, "diff-add")}
+                              <div style={{ fontFamily: "'Special Elite', 'Courier New', monospace", fontSize: 10.5, lineHeight: 1.7, color: "#141414", background: "#F4FAF5", border: "1px solid #8FC49E", borderLeft: "3px solid #1F7A3A", borderRadius: 0, padding: "10px 12px", whiteSpace: "pre-wrap" }}>
+                                {renderOps(change.ops, "new")}
                               </div>
                             </div>
                           )}
                         </div>
-                        {change.type === "modified" && ((change.old_highlights?.length || 0) + (change.new_highlights?.length || 0)) > 0 && (
+                        {change.type === "modified" && change.blocks.length > 0 && (
                           <div style={{ marginTop: 10, padding: "8px 11px", background: "#F3EFE6", borderRadius: 0, display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
                             <span style={{ fontSize: 9, fontFamily: "'Special Elite', 'Courier New', monospace", color: "#8A857B", textTransform: "uppercase", letterSpacing: "0.1em", marginRight: 4 }}>Changes:</span>
-                            {change.old_highlights?.map((p, j) => <span key={"del" + j} className="diff-del" style={{ fontSize: 9 }}>{p}</span>)}
-                            {change.new_highlights?.map((p, j) => <span key={"add" + j} className="diff-add" style={{ fontSize: 9 }}>{p}</span>)}
+                            {change.blocks.map((b, j) => (
+                              <span key={j} className="chg-chip">
+                                {b.old && <span className="diff-del">{clip(b.old, 60)}</span>}
+                                {b.old && b.new && <span style={{ color: "#8A857B" }}> → </span>}
+                                {b.new && <span className="diff-add">{clip(b.new, 60)}</span>}
+                              </span>
+                            ))}
                           </div>
                         )}
                       </div>

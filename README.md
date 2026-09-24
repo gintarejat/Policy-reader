@@ -18,11 +18,11 @@ Policy Reader solves both problems with two focused modes.
 
 ### Compare mode
 
-Paste two versions of the same policy. The AI identifies the sections that changed, were added, or were removed.
+Paste two versions of the same policy. **The comparison is done by code, not by the AI:** `src/policyDiff.js` splits both versions into sections, matches them by number or title, and runs a word-level diff (longest common subsequence) on each pair, in the browser.
 
-Click a changed section to open it as a side-by-side panel: the previous version on the left, the updated version on the right, with the phrases the AI marked as changed highlighted. The AI works at phrase level, so a threshold change from EUR 5,000 to EUR 3,000 can show up as an inline edit rather than a paragraph rewrite.
+Click a changed section to open it as a side-by-side panel: the previous version on the left, the updated version on the right, with deleted words struck through and added words highlighted. The text in both panels is your pasted text, character for character, so a dropped "not" or a changed number is always visible. Each change is also listed as an `old → new` chip, and sections where a number changed are flagged **NUMBER CHANGED**.
 
-**Important:** this is not a deterministic diff. The text in both panels is reproduced by the AI, not copied from your documents, so a change can be missed or mis-copied. Check every material change against the original documents. A real word-level diff is on the roadmap.
+**The AI's only job in Compare mode** is to write a one-line summary of each changed section and an overall summary, from the list of changes the code found. It never reproduces policy text. If the AI call fails, the full diff still shows.
 
 Section-level change types:
 - **Modified** — section existed in both versions but content changed
@@ -52,7 +52,7 @@ The AI reads text and identifies patterns. It does not have institutional contex
 
 **How the human-in-the-loop works in practice:**
 
-In Compare mode, the AI lists the changed sections and highlights the phrases it identifies as changed. The officer decides whether a change is material to their current work, whether it affects an ongoing investigation, and whether a policy update requires a workflow change.
+In Compare mode, code finds and highlights every changed word; the AI only summarises those changes. The officer decides whether a change is material to their current work, whether it affects an ongoing investigation, and whether a policy update requires a workflow change.
 
 In Analyze mode, the extracted rules serve as a starting point for investigation, not a definitive answer. When an officer searches for "mixer" and finds a Prohibited rule, they then read the original policy section — referenced by its section ID — to confirm scope and applicability. The AI saves the time of finding the rule; the officer applies professional judgment in interpreting it.
 
@@ -76,8 +76,8 @@ In Analyze mode, the extracted rules serve as a starting point for investigation
 4. Click Run Comparison
 5. Review the summary bar — total modified / added / removed sections
 6. Click each changed section card to expand the side-by-side diff
-7. Read the old and new text; the changed phrases are highlighted inline
-8. Confirm each material change against the original documents (the panel text is AI-reproduced)
+7. Read the old and new text; deleted and added words are highlighted inline
+8. Check the AI-written one-line summaries against the highlighted changes
 9. Assess whether any change is material to your current caseload or workflow
 10. Document any material changes in your case management system
 ```
@@ -118,10 +118,10 @@ Typical use cases:
 | Frontend | React (JSX), built with Vite |
 | Backend | Vercel serverless proxy `api/claude.js` (keeps the API key server-side) |
 | AI engine | Claude API — `POST /v1/messages` |
-| Model | `claude-sonnet-4-5`, `max_tokens: 4000` |
+| Model | `claude-sonnet-4-5`; `max_tokens: 4000` (Analyze), `1500` (Compare summaries) |
 | Output format | JSON requested in the prompt, parsed in the browser |
 | Streaming | None — one request, one response |
-| Change highlighting | Highlights the phrases the AI lists as changed |
+| Compare engine | Section matching + word-level LCS diff in the browser (`src/policyDiff.js`), no AI |
 | Styling | Inline styles + Google Fonts (Archivo Black, Special Elite) |
 
 ---
@@ -156,7 +156,8 @@ The key lives only in Vercel's server-side environment. The browser calls `/api/
 - **Non-English policies:** the model can read most European languages, but this hasn't been systematically tested here, and the UI labels are in English.
 - **Complex table structures:** Rules embedded inside complex HTML or Word tables may not extract cleanly. Paste the text content of tables as plain text.
 - **AI classification errors:** The AI occasionally misclassifies a Conditional rule as Permitted or vice versa. Always verify rule type against the original text for any rule you act on.
-- **Not a deterministic diff:** Compare-mode text is reproduced by the AI. Verify against the source documents.
+- **Section matching needs headings:** sections are found from lines like "Section 12", "Article 5", "§ 6" or "4.2 Sanctions". Without headings the whole document is compared as one block (still word-level). A renumbered section with a new title shows as removed + added.
+- **Compare summaries are AI-written:** the diff is exact, the one-line summaries are not. Read the highlighted changes, not just the summaries.
 - **No source-sentence trace:** extracted rules show the section ID, not the exact sentence they came from.
 - **No rate limit on the API route** yet.
 
@@ -165,7 +166,7 @@ The key lives only in Vercel's server-side environment. The browser calls `/api/
 ## Roadmap — v2.0 and beyond
 
 - [x] Secure backend proxy — API key server-side
-- [ ] Deterministic word-level diff in Compare mode
+- [x] Deterministic word-level diff in Compare mode
 - [ ] Source-sentence trace for every extracted rule
 - [ ] Multi-document batch analysis — load 3+ policies simultaneously
 - [ ] Cross-document conflict detection — flag rules that contradict across policies
