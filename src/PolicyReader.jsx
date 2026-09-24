@@ -1,5 +1,16 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { comparePolicies } from "./policyDiff";
+import { HowToUsePage, PlacePage } from "./InfoPages";
+
+// Header tabs; each has its own link (#compare, #analyze, #how-to-use, #place-in-aml-os)
+const MODES = {
+  compare: { label: "⬡ Compare", hash: "#compare" },
+  analyze: { label: "◈ Analyze", hash: "#analyze" },
+  howto: { label: "? How To Use", hash: "#how-to-use" },
+  place: { label: "▦ Place in AML OS", hash: "#place-in-aml-os" },
+};
+const modeFromHash = () =>
+  Object.keys(MODES).find((m) => MODES[m].hash === window.location.hash) || "compare";
 
 const SAMPLE_V1 = `SECTION 1 — SCOPE AND APPLICATION
 This policy applies to all customer accounts opened after 1 January 2023. Daily transaction limits are set at EUR 5,000 for standard accounts. Customers must provide full KYC documentation within 30 days of account opening. Non-compliance results in account restriction.
@@ -91,7 +102,17 @@ function renderOps(ops, side) {
 const clip = (s, n) => (s.length > n ? s.slice(0, n) + "…" : s);
 
 export default function PolicyReader() {
-  const [mode, setMode] = useState("compare");
+  const [mode, setMode] = useState(modeFromHash);
+  const switchMode = (m) => {
+    setMode(m);
+    history.replaceState(null, "", MODES[m].hash);
+    window.scrollTo(0, 0);
+  };
+  useEffect(() => {
+    const onHash = () => setMode(modeFromHash());
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
   const [v1, setV1] = useState("");
   const [v2, setV2] = useState("");
   const [analyzeText, setAnalyzeText] = useState("");
@@ -260,7 +281,7 @@ export default function PolicyReader() {
       `}</style>
       <a className="aos-back" href="https://ajatauaml.com/aml-operating-system.html">&larr; AML Operating System</a>
 
-      <div style={{ background: "#141414", padding: "0 28px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 52 }}>
+      <div style={{ background: "#141414", padding: "10px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10, minHeight: 52 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ width: 28, height: 28, background: "#E4161B", borderRadius: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -274,23 +295,26 @@ export default function PolicyReader() {
           <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: 16, fontWeight: 600, color: "#FFFDF8" }}>Policy Reader</span>
           <span style={{ fontSize: 9, fontFamily: "'Special Elite', 'Courier New', monospace", color: "#FFD60A", letterSpacing: "0.1em" }}>AFC INTELLIGENCE SUITE</span>
         </div>
-        <div style={{ display: "flex", gap: 4 }}>
-          {["compare", "analyze"].map((m) => (
+        <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+          {Object.keys(MODES).map((m) => (
             <button key={m}
-              onClick={() => { setMode(m); setError(""); setSearch(""); }}
+              onClick={() => { switchMode(m); setError(""); setSearch(""); }}
               style={{
                 padding: "5px 14px", borderRadius: 0, fontSize: 11, fontWeight: 600,
                 letterSpacing: "0.06em", textTransform: "uppercase", border: "none",
-                background: mode === m ? "#E4161B" : "transparent",
-                color: mode === m ? "#FFFDF8" : "#BDB6A6",
+                background: mode === m ? (m === "howto" || m === "place" ? "#FFD60A" : "#E4161B") : "transparent",
+                color: mode === m ? (m === "howto" || m === "place" ? "#141414" : "#FFFDF8") : "#BDB6A6",
               }}>
-              {m === "compare" ? "⬡ Compare" : "◈ Analyze"}
+              {MODES[m].label}
             </button>
           ))}
         </div>
       </div>
 
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "24px 20px" }}>
+
+        {mode === "howto" && <HowToUsePage />}
+        {mode === "place" && <PlacePage />}
 
         {mode === "compare" && (
           <>

@@ -1,179 +1,102 @@
 # Policy Reader
 
-**AI-assisted document analysis (LLM extraction, read-only). Two modes: version comparison and rule extraction.**
+> Two tools in one. **Compare** shows what changed between two versions of a compliance policy, as a word-level diff computed by code. **Analyze** extracts the rules, thresholds and restrictions in a policy into a searchable, typed list.
 
-Built for compliance officers, MLROs, and legal teams who manage AML, crypto and sanctions policies. Policy Reader cuts the manual work of tracking what changed between policy versions and locating specific rules during live investigations. It speeds up reading; it doesn't replace it.
+**Live:** [policy-reader-fawn.vercel.app](https://policy-reader-fawn.vercel.app) · [How to use](https://policy-reader-fawn.vercel.app/#how-to-use) · [Place in the AML OS](https://policy-reader-fawn.vercel.app/#place-in-aml-os)
 
----
-
-## What it does
-
-Compliance policy documents are dense, update frequently, and are almost never structured for fast retrieval. When a regulatory update lands — a new MiCA technical standard, an AMLR delegated act, an internal control revision — a compliance officer has to read the entire document to find what changed. During a live investigation, finding the specific rule that applies to a crypto mixer or an unhosted wallet means scrolling through 40 pages.
-
-Policy Reader solves both problems with two focused modes.
+Part of the **[AML Operating System](https://ajatauaml.com/aml-operating-system.html)** · Layer 1, Governance (policy → control).
 
 ---
 
-## Modes
+## What it is
 
-### Compare mode
-
-Paste two versions of the same policy. **The comparison is done by code, not by the AI:** `src/policyDiff.js` splits both versions into sections, matches them by number or title, and runs a word-level diff (longest common subsequence) on each pair, in the browser.
-
-Click a changed section to open it as a side-by-side panel: the previous version on the left, the updated version on the right, with deleted words struck through and added words highlighted. The text in both panels is your pasted text, character for character, so a dropped "not" or a changed number is always visible. Each change is also listed as an `old → new` chip, and sections where a number changed are flagged **NUMBER CHANGED**.
-
-**The AI's only job in Compare mode** is to write a one-line summary of each changed section and an overall summary, from the list of changes the code found. It never reproduces policy text. If the AI call fails, the full diff still shows.
-
-Section-level change types:
-- **Modified** — section existed in both versions but content changed
-- **Added** — section is new in Version 2
-- **Removed** — section existed in Version 1 but was deleted
-
-### Analyze mode
-
-Paste any compliance policy document. The AI reads the full text and returns a structured breakdown across four outputs:
-
-1. **Document overview** — inferred title, document type, jurisdiction, and a 2–3 sentence plain-language scope summary
-2. **Keywords by section** — each section mapped to its key terms; clicking any keyword filters the rules below
-3. **Rules database** — the distinct rules the AI extracts, classified by type, tagged with the section it came from, and grouped by keyword. Rule types: Prohibited / Permitted / Threshold / Required / Conditional
-4. **Thresholds summary table** — monetary limits, time periods and conditional thresholds the AI finds, in one table with section references
-
-The rules database is fully searchable in real time across keyword, rule text, section title, and type.
-
----
-
-## Human-in-the-loop design
-
-Policy Reader is an AI-assisted tool, not an autonomous one. The AI extracts and structures information — the compliance officer interprets and acts on it.
-
-**Why this matters in a regulatory context:**
-
-The AI reads text and identifies patterns. It does not have institutional context, jurisdiction-specific regulatory history, or awareness of how a rule has been interpreted in practice. A phrase classified as "Permitted" by the AI may carry conditions or exceptions that are documented elsewhere in the institution's policy framework. A threshold extracted as "EUR 10,000" may apply differently depending on customer type or product.
-
-**How the human-in-the-loop works in practice:**
-
-In Compare mode, code finds and highlights every changed word; the AI only summarises those changes. The officer decides whether a change is material to their current work, whether it affects an ongoing investigation, and whether a policy update requires a workflow change.
-
-In Analyze mode, the extracted rules serve as a starting point for investigation, not a definitive answer. When an officer searches for "mixer" and finds a Prohibited rule, they then read the original policy section — referenced by its section ID — to confirm scope and applicability. The AI saves the time of finding the rule; the officer applies professional judgment in interpreting it.
-
-**What the AI cannot do:**
-
-- Determine whether a rule applies to a specific customer or transaction
-- Identify regulatory intent behind a policy change
-- Replace a qualified compliance officer's legal assessment
-- Operate without review on decisions that affect investigations, SAR filings, or customer actions
-
----
-
-## Workflow
-
-### Compare workflow
-
-```
-1. Obtain both policy versions (PDF export to text, or paste from document)
-2. Paste Version 1 (current / original) into the left text area
-3. Paste Version 2 (updated) into the right text area
-4. Click Run Comparison
-5. Review the summary bar — total modified / added / removed sections
-6. Click each changed section card to expand the side-by-side diff
-7. Read the old and new text; deleted and added words are highlighted inline
-8. Check the AI-written one-line summaries against the highlighted changes
-9. Assess whether any change is material to your current caseload or workflow
-10. Document any material changes in your case management system
-```
-
-Typical use cases:
-- Quarterly policy review cycle — identifying what changed before sign-off
-- Onboarding new team members — showing what the current policy says vs. what a previous version said
-- Regulatory inspection preparation — demonstrating that policy changes were tracked and reviewed
-- Post-regulatory-update review — finding how a regulatory change moved internal thresholds
-
-### Analyze workflow
-
-```
-1. Obtain the policy document text (copy from PDF, Word, or internal system)
-2. Paste into the text area
-3. Click Analyse Policy
-4. Review the Document Overview — confirm the AI correctly identified the document type and jurisdiction
-5. Use the Keywords by Section table to understand the document's scope
-6. Click a keyword pill to filter all rules for that topic
-7. Or use the search bar to find rules by free text
-8. Review each extracted rule — note the section ID, rule type, and threshold
-9. For any rule you need to act on, use the section ID to locate the original text
-10. Apply professional judgment on interpretation and applicability
-```
-
-Typical use cases:
-- Live investigation — quickly finding the rule that governs the specific activity under review
-- Onboarding — building a fast reference map of a new policy
-- Threshold audit — checking all monetary limits in one view before a transaction decision
-- Training — understanding which section governs each compliance obligation
-
----
-
-## Tech stack
-
-| Layer | Technology |
+| | |
 |---|---|
-| Frontend | React (JSX), built with Vite |
-| Backend | Vercel serverless proxy `api/claude.js` (keeps the API key server-side) |
-| AI engine | Claude API — `POST /v1/messages` |
-| Model | `claude-sonnet-4-5`; `max_tokens: 4000` (Analyze), `1500` (Compare summaries, which get the diff plus both section texts) |
-| Output format | JSON requested in the prompt, parsed in the browser |
-| Streaming | None — one request, one response |
-| Compare engine | Section matching + word-level LCS diff in the browser (`src/policyDiff.js`), no AI |
-| Styling | Inline styles + Google Fonts (Archivo Black, Special Elite) |
+| **Category** | AI-assisted document analysis (LLM extraction and classification), with a deterministic diff for Compare |
+| **Not** | An agent (no tools, no loop) |
+| **Users** | Compliance / policy owners, 2nd-line reviewers, anyone who has to implement a policy update |
+| **Output** | On screen: a change list with a word-level diff (Compare), or document profile + keywords + rules + thresholds summary (Analyze) |
 
----
+## Architecture
 
-## Running locally
+```
+Browser (React + Vite build)
+ ├─ Tabs: ⬡ Compare | ◈ Analyze | How To Use | Place in AML OS
+ ├─ Compare: src/policyDiff.js splits both versions into sections, matches them,
+ │           runs a word-level LCS diff in the browser (no AI)
+ │           → AI writes one-line summaries of the changes it is given
+ ├─ Analyze: prompt built in the browser → fetch('/api/claude')
+ ├─ Robust JSON parse (strips text before the first { and after the last })
+ └─ Render: change cards / rule list, type filter, keyword search
+          │
+Vercel serverless  api/claude.js
+          └─ adds ANTHROPIC_API_KEY → Anthropic Messages API
+                (claude-sonnet-4-5; max_tokens 4000 Analyze, 1500 Compare summaries)
+```
 
-**Prerequisites:** Node.js 18+, an Anthropic API key, the Vercel CLI for the API route.
+| File | Role |
+|---|---|
+| `src/PolicyReader.jsx` | UI, prompts, sample policies (V1/V2) |
+| `src/policyDiff.js` | Section matching and word-level diff for Compare |
+| `src/InfoPages.jsx` | "How To Use" and "Place in AML OS" pages |
+| `api/claude.js` | Server-side key proxy |
+| `vite.config.js`, `index.html` | Build |
+
+## What is code and what is AI
+
+| Function | Done by |
+|---|---|
+| Finding changed sections, showing old and new text with changes highlighted | **Code**: word-level diff of the pasted text |
+| Classifying the change (modified / added / removed), NUMBER CHANGED flag | **Code** |
+| One-line summary per changed section + overall summary | **AI** (given the diff and both section texts) |
+| Document title, type, jurisdiction, scope | **AI** |
+| Rule extraction + type (prohibited / permitted / threshold / required / conditional) | **AI** |
+| Thresholds summary | **AI** |
+| Search, type filter, grouping by keyword, counts | **Code** |
+
+## AI inventory
+
+| Field | Value |
+|---|---|
+| Purpose | Read policy text; summarise changes and list rules |
+| Data in | The pasted policy text (one or two versions) |
+| Data out | JSON: change summaries, or document profile + sections + rules + thresholds |
+| Model | `claude-sonnet-4-5`; `max_tokens` 4000 (Analyze), 1500 (Compare summaries) |
+| Autonomy level | **Read-only**: nothing is written or sent anywhere |
+| Human gate | None in the tool. The reader must check it against the source. (Planned: reviewer sign-off) |
+| Data caution | Internal policies may be confidential. Only paste text you're allowed to share with an external AI provider. |
+
+## Known limitations
+
+1. **Compare summaries are AI-written.** The diff is exact (it is your own text), but a one-line summary can misdescribe or leave out a change. Read the highlighted changes, not just the summaries.
+2. **Compare matches sections by heading.** It recognises "Section 12", "Article 5", "§ 6" and numbered headings like "4.2 Sanctions". Without headings the whole document is compared as one block (still word-level). A renumbered section with a new title shows as removed + added.
+3. **Extracted rules aren't traced to a source sentence,** so a rule could be paraphrased wrongly or invented. Planned: the model quotes the exact sentence and anything it can't find verbatim is dropped.
+4. **Long documents:** the Analyze output cap of 4,000 tokens can cut the JSON off, and then the parse fails or rules go missing silently. Planned: chunking by section.
+5. **Paste only:** no PDF/DOCX upload yet.
+6. **Open proxy with no rate limit.** `api/claude.js` forwards any request body to the Anthropic API with the server's key. Planned: a rate limit and a fixed request shape.
+
+## Setup
 
 ```bash
 git clone https://github.com/gintarejat/Policy-reader
-cd Policy-reader
 npm install
-vercel dev          # runs the Vite app and /api/claude together
-# set ANTHROPIC_API_KEY in Vercel (Project → Settings → Environment Variables)
-# or in a local .env file for vercel dev
+npm run dev        # UI only; /api/claude needs Vercel
+# or
+vercel dev         # UI + API together
+# Vercel → Environment Variables:
+ANTHROPIC_API_KEY=sk-ant-...
 ```
 
-`npm run dev` alone starts the interface, but the analysis calls need `/api/claude`, so use `vercel dev` for full local testing.
+## Roadmap
 
----
-
-## API key security
-
-The key lives only in Vercel's server-side environment. The browser calls `/api/claude`; `api/claude.js` adds the key and forwards the request to Anthropic. The key is never in the frontend bundle.
-
----
-
-## Known limitations — Beta v1.0
-
-- **Long documents:** the answer is capped at 4,000 tokens, so a long policy with many rules can produce cut-off JSON (parse error or missing rules). Analyse a few sections at a time.
-- **Scanned PDFs:** The tool accepts plain text only. Scanned PDF images must be converted to text first using an OCR tool before pasting.
-- **Non-English policies:** the model can read most European languages, but this hasn't been systematically tested here, and the UI labels are in English.
-- **Complex table structures:** Rules embedded inside complex HTML or Word tables may not extract cleanly. Paste the text content of tables as plain text.
-- **AI classification errors:** The AI occasionally misclassifies a Conditional rule as Permitted or vice versa. Always verify rule type against the original text for any rule you act on.
-- **Section matching needs headings:** sections are found from lines like "Section 12", "Article 5", "§ 6" or "4.2 Sanctions". Without headings the whole document is compared as one block (still word-level). A renumbered section with a new title shows as removed + added.
-- **Compare summaries are AI-written:** the diff is exact, the one-line summaries are not. Read the highlighted changes, not just the summaries.
-- **No source-sentence trace:** extracted rules show the section ID, not the exact sentence they came from.
-- **No rate limit on the API route** yet.
-
----
-
-## Roadmap — v2.0 and beyond
-
-- [x] Secure backend proxy — API key server-side
-- [x] Deterministic word-level diff in Compare mode
+- [x] Deterministic word-level diff in Compare
 - [ ] Source-sentence trace for every extracted rule
-- [ ] Multi-document batch analysis — load 3+ policies simultaneously
-- [ ] Cross-document conflict detection — flag rules that contradict across policies
-- [ ] Export to PDF and Excel — downloadable rule database and threshold table
-- [ ] Version history tracking — compare any two versions from a stored history, not just pasted text
-- [ ] File upload — drag-and-drop PDF/Word/TXT rather than paste
-- [ ] Audit log — record every comparison and analysis with timestamp for regulatory review trail
+- [ ] Chunking by section for long documents
+- [ ] A regex threshold extractor
+- [ ] A threshold delta table (`EUR 5,000 → 3,000, −40%`)
+- [ ] A control-matrix view (requirement → control → evidence → owner)
+- [ ] A gap check against a verified obligation list
+- [ ] Version history
 
 ---
 
@@ -209,4 +132,4 @@ Policy Reader is an AI-assisted productivity tool for compliance professionals. 
 
 ---
 
-*Built by Gintarė Jatautytė · ajatauaml.com · AML Compliance · 2026*
+*Extraction aids reading. It doesn't replace it. Not legal advice. Built by Gintarė Jatautytė · [ajatauaml.com](https://ajatauaml.com)*
