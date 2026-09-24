@@ -132,13 +132,17 @@ export default function PolicyReader() {
     try {
       const listing = diff.changes.map((c, i) => {
         const detail = c.type === "modified"
-          ? c.blocks.slice(0, 25).map((b) => `  - "${clip(b.old, 200)}" → "${clip(b.new, 200)}"`).join("\n")
-          : "  " + clip(c.type === "added" ? c.newText : c.oldText, 1200);
+          ? `OLD TEXT:\n${clip(c.oldText, 2500)}\nNEW TEXT:\n${clip(c.newText, 2500)}\nCHANGES FOUND BY THE DIFF:\n` +
+            c.blocks.slice(0, 25).map((b) => `  - "${clip(b.old, 200)}" → "${clip(b.new, 200)}"`).join("\n")
+          : clip(c.type === "added" ? c.newText : c.oldText, 2500);
         return `[${i}] ${c.type.toUpperCase()} — ${c.section}\n${detail}`;
       }).join("\n\n");
       const prompt = "You are a compliance document analyst. A word-level diff of two policy versions has already been computed. " +
-        "Below are the changed sections with each change shown as \"old\" → \"new\" (empty means nothing).\n\n" + listing + "\n\n" +
-        "Write a plain-language summary. Describe only the listed changes; do not add, infer or restate policy text. " +
+        "Below are the changed sections: for modified sections you get the old text, the new text, and the changes the diff found as \"old\" → \"new\" (empty means nothing).\n\n" + listing + "\n\n" +
+        "Write a plain-language summary. Describe only what actually changed between the old and new text. " +
+        "A single \"old\" → \"new\" pair can join words from two unrelated rules, so read the full texts to decide what each change means, " +
+        "and name the rule each number belongs to (e.g. \"KYC documentation deadline 30 → 14 days\"). If a number belongs to a new rule, say it is new; do not describe it as a change to an old one. " +
+        "Do not add, infer or quote policy text beyond that. " +
         "Return ONLY a JSON object, no markdown: " +
         '{"summary":"1-2 sentence overall summary","sections":[{"id":0,"summary":"one sentence on what changed in this section"}]}';
       const raw = await callClaude({

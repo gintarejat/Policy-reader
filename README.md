@@ -118,7 +118,7 @@ Typical use cases:
 | Frontend | React (JSX), built with Vite |
 | Backend | Vercel serverless proxy `api/claude.js` (keeps the API key server-side) |
 | AI engine | Claude API — `POST /v1/messages` |
-| Model | `claude-sonnet-4-5`; `max_tokens: 4000` (Analyze), `1500` (Compare summaries) |
+| Model | `claude-sonnet-4-5`; `max_tokens: 4000` (Analyze), `1500` (Compare summaries, which get the diff plus both section texts) |
 | Output format | JSON requested in the prompt, parsed in the browser |
 | Streaming | None — one request, one response |
 | Compare engine | Section matching + word-level LCS diff in the browser (`src/policyDiff.js`), no AI |
