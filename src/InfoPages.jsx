@@ -167,7 +167,6 @@ export function HowToUsePage() {
       <div className="ip-sec">Troubleshooting</div>
       <Table head={["Symptom", "Likely cause"]} rows={[
         ['"Please paste both policy versions." / "Please paste a policy document."', "Empty input"],
-        ['"API error 401"', "API key missing or wrong in Vercel"],
         ['"API error 500" or another code', "The upstream API or the proxy failed; retry"],
         ["Compare: \"AI summaries unavailable\"", "The AI call failed. The diff below it is complete."],
         ["Compare: a renumbered section shows as removed + added", "Sections are matched by number, then title. Check both cards."],
